@@ -77,8 +77,8 @@ web-content-app/
 | Phase | Status | Title | Screens / US |
 |---|---|---|---|
 | 0 | ✅ | Folder Restructure (Villa T → reference) | — |
-| 1 | ⬜ | Foundation & AI-friendly Docs | — |
-| 2 | ⬜ | Data Model & Type Layer | — |
+| 1 | ✅ | Foundation & AI-friendly Docs | — |
+| 2 | ✅ | Data Model & Type Layer | — |
 | 3 | ⬜ | State Management & Persistence | — |
 | 4 | ⬜ | AI Provider Abstraction & Prompts | US-013, US-015 (backend) |
 | 5 | ⬜ | Home & Project Lifecycle | S-00, S-01 · US-006/7/8/9 |
@@ -115,17 +115,22 @@ web-content-app/
 **Goal:** Scaffolding chạy được, docs đủ để AI vibe-code các phase sau.
 
 ### Tasks
-- [ ] Init Next.js 14 (App Router) + TypeScript + Tailwind
-- [ ] Install deps: `shadcn/ui`, `zustand`, `reactflow`, `jszip`, `html-to-image`, `@anthropic-ai/sdk`, Claude Agent SDK, `sonner`
-- [ ] `npx shadcn init` + add: button, input, textarea, dialog, dropdown-menu, toast, card, badge, checkbox, tabs, separator
-- [ ] Tạo folder skeleton theo target structure (kèm `.gitkeep` nếu rỗng)
-- [ ] Viết `CLAUDE.md` (root) — order đọc file, tech stack, folder map, conventions ngắn, link sang docs/
-- [ ] Viết `README.md` — setup, npm scripts, prerequisites (Node 20+, Claude Code optional)
-- [ ] Viết `CHANGELOG.md` — Keep-a-Changelog format, entry `## [0.1.0] — Phase 1: Foundation`
-- [ ] Viết `docs/architecture.md` — diagram text UI ↔ Zustand ↔ API routes ↔ (AI provider | fs)
-- [ ] Viết `docs/conventions.md` — naming, import order, "no italic" UI text, error toast pattern
-- [ ] Stub `docs/troubleshooting.md` (cập nhật dần)
-- [ ] Tạo `.env.local.example` với `ANTHROPIC_API_KEY=`
+- [x] Init Next.js 15 (App Router) + TypeScript + Tailwind
+- [x] Install deps: `zustand`, `reactflow`, `jszip`, `html-to-image`, `@anthropic-ai/sdk`, `sonner`
+- [x] `npx shadcn init --defaults` + add: button, input, textarea, dialog, dropdown-menu, card, badge, checkbox, tabs, separator, sonner, label, select
+- [x] Tạo folder skeleton theo target structure
+- [x] Viết `CLAUDE.md` (root) — order đọc file, tech stack, folder map, conventions, rules
+- [x] Viết `README.md` — setup, npm scripts, prerequisites
+- [x] Viết `CHANGELOG.md` — Keep-a-Changelog format
+- [x] Viết `docs/architecture.md` — system layers + data flow
+- [x] Viết `docs/data-model.md` — tất cả TS types
+- [x] Viết `docs/ai-prompts.md` — 5 prompts spec + placeholders
+- [x] Viết `docs/api-routes.md` — API inventory
+- [x] Viết `docs/state-management.md` — store map + patterns
+- [x] Viết `docs/conventions.md` — naming, imports, error handling
+- [x] Viết `docs/troubleshooting.md` — stub + initial entries
+- [x] Tạo `.env.local.example`, thêm `typecheck` script, update `.gitignore`
+- [x] git init + commit phase 1
 
 ### Done khi
 - `npm run dev` chạy được, trang trắng có header "PXcanvas"
@@ -138,15 +143,15 @@ web-content-app/
 **Goal:** Đóng băng types/contracts trước khi viết UI.
 
 ### Tasks
-- [ ] `src/lib/types/project.ts` — `Project { id, name, createdAt, updatedAt, currentStep, sitemapId?, brandVoiceId? }`
-- [ ] `src/lib/types/sitemap.ts` — `SitemapNode { id, name, description, children, parentId, improved? }`, `Sitemap`
-- [ ] `src/lib/types/brand-voice.ts` — `BrandVoice { toneKeywords[3], principles, doExamples[], dontExamples[], blacklist[] }`
-- [ ] `src/lib/types/content.ts` — `Section { id, name }`, `PageContent { pageId, sections, markdown, status, generatedAt }`
-- [ ] `src/lib/types/settings.ts` — `Settings { provider, apiKey?, outputFolder, ... }`
-- [ ] `src/lib/types/ux-analysis.ts` — `UxImprovement { id, problem, reason, suggestion, checked }`
-- [ ] Viết `docs/data-model.md` — full reference, comment ngắn mỗi field
-- [ ] Document localStorage schema: `pxcanvas:projects`, `pxcanvas:project:{id}`, `pxcanvas:settings`
-- [ ] (Optional) Zod schemas cho validate khi import zip
+- [x] `src/lib/types/project.ts` — `Project`, `ProjectZipMeta`
+- [x] `src/lib/types/sitemap.ts` — `SitemapNode`
+- [x] `src/lib/types/brand-voice.ts` — `BrandVoice`
+- [x] `src/lib/types/content.ts` — `Section`, `PageContent`, `PageContentStatus`
+- [x] `src/lib/types/settings.ts` — `Settings`, `AIProvider`, `DEFAULT_SETTINGS`
+- [x] `src/lib/types/ux-analysis.ts` — `UxImprovement`, `FormInput`, `SiteType`
+- [x] `docs/data-model.md` — viết ở Phase 1
+- [x] localStorage schema documented trong `docs/state-management.md`
+- [ ] (Post-MVP) Zod schemas cho import zip validation
 
 ### Done khi
 - `tsc --noEmit` pass
@@ -355,8 +360,8 @@ web-content-app/
 
 | Phase | Version | Date | Notes |
 |---|---|---|---|
-| 1 | 0.1.0 | — | Foundation |
-| 2 | 0.2.0 | — | Data Model |
+| 1 | 0.1.0 | 2026-05-20 | Foundation |
+| 2 | 0.2.0 | 2026-05-20 | Data Model |
 | 3 | 0.3.0 | — | State |
 | 4 | 0.4.0 | — | AI Provider |
 | 5 | 0.5.0 | — | Home |

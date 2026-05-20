@@ -89,6 +89,7 @@ Chi tiết: `docs/conventions.md`. Tóm tắt:
 - API route: `POST`, có try/catch, return `{ data }` | `{ error }`.
 - Toast: dùng `sonner`, không dùng alert/confirm trừ modal confirm xóa.
 - No `any`. No inline styles. No comments trừ khi WHY không obvious.
+- **UI components: dùng shadcn/ui với màu mặc định (default color palette).** Không override CSS variable màu trừ khi user yêu cầu rõ ràng. Không custom theme.
 
 ---
 

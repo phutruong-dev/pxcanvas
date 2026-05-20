@@ -122,9 +122,17 @@ toast.warning("Storage almost full — export project to free space")
 - No JSDoc on simple functions. Only on complex AI prompt builders.
 - No "TODO" in committed code — put them in MVP-plan.md instead.
 
+## shadcn/ui & Colors
+
+- **Luôn dùng shadcn/ui components** cho mọi UI element: Button, Input, Dialog, Card, Badge, Checkbox, Select, Tabs, Separator, Sonner, Label, Textarea, DropdownMenu.
+- **Màu mặc định (default palette)** — không override CSS variables trong `globals.css` trừ khi user yêu cầu rõ ràng.
+- **Không custom theme** — không tạo file `theme.ts`, không đổi `--primary`, `--background`, v.v.
+- Nếu cần màu semantic: dùng class `text-destructive`, `text-muted-foreground`, `bg-muted`, `border`, v.v. theo hệ shadcn.
+- Icon: dùng `lucide-react` (đã cài kèm shadcn).
+
 ## Tailwind
 
-- Mobile-first (min-width). Desktop-only layout (lg: breakpoint minimum).
+- Desktop-only layout (1280px+). Không optimize mobile.
 - No inline styles. Tailwind classes only.
 - Use `cn()` from `@/lib/utils` for conditional classes.
 - Class order: layout → sizing → spacing → typography → color → border → effects.
