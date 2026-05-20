@@ -80,7 +80,7 @@ web-content-app/
 | 1 | ✅ | Foundation & AI-friendly Docs | — |
 | 2 | ✅ | Data Model & Type Layer | — |
 | 3 | ✅ | State Management & Persistence | — |
-| 4 | ⬜ | AI Provider Abstraction & Prompts | US-013, US-015 (backend) |
+| 4 | ✅ | AI Provider Abstraction & Prompts | US-013, US-015 (backend) |
 | 5 | ⬜ | Home & Project Lifecycle | S-00, S-01 · US-006/7/8/9 |
 | 6 | ⬜ | Step 1 — Input & UX Analysis | S-02 · US-001 |
 | 7 | ⬜ | Step 2 — Sitemap Canvas | S-03 · US-002/3/10 |
@@ -183,16 +183,18 @@ web-content-app/
 **Goal:** Mọi AI call đi qua 1 interface, prompts đọc từ disk (US-015).
 
 ### Tasks
-- [ ] `src/lib/ai/provider.ts` — interface `AIProvider.call(promptKey, vars): Promise<string>`
-- [ ] `src/lib/ai/claude-agent.ts` — Mode A (Claude Agent SDK trong API route)
-- [ ] `src/lib/ai/anthropic-api.ts` — Mode B (fetch + x-api-key)
-- [ ] `src/lib/ai/detect.ts` — auto-detect Claude Code → Mode A default
-- [ ] `src/lib/ai/prompt-loader.ts` — đọc `prompts/*.md`, replace `{{placeholder}}`, regen từ default khi missing
-- [ ] API route `/api/ai/test-connection` — ping cả 2 mode
-- [ ] API route `/api/prompts/ensure-defaults` — chạy lần đầu, sinh 5 file mặc định
-- [ ] Seed nội dung 5 prompt files (system prompt + placeholder spec) — follow format conversion-focus + brand voice rules
-- [ ] Viết `docs/ai-prompts.md` — list 5 prompts, placeholders, expected JSON output shape
-- [ ] Bắt đầu `docs/api-routes.md` inventory
+- [x] `src/lib/ai/provider.ts` — `callAI(promptKey, vars, options)` single entry point
+- [x] `src/lib/ai/claude-agent.ts` — Mode A (spawn claude CLI subprocess, 30s timeout)
+- [x] `src/lib/ai/anthropic-api.ts` — Mode B (@anthropic-ai/sdk)
+- [x] `src/lib/ai/detect.ts` — execSync `claude --version`
+- [x] `src/lib/ai/prompt-loader.ts` — read + replace + auto-regen from defaults
+- [x] API `/api/ai/test-connection`
+- [x] API `/api/prompts/ensure-defaults`
+- [x] API `/api/health` (bonus)
+- [x] API `/api/dev/regenerate-prompts` (dev-only bonus)
+- [x] 5 prompt files seeded in `prompts/`
+- [x] `docs/ai-prompts.md` — viết ở Phase 1
+- [x] `docs/api-routes.md` — viết ở Phase 1
 
 ### Done khi
 - `/api/ai/test-connection` trả OK cho cả 2 mode (nếu có)
@@ -363,7 +365,7 @@ web-content-app/
 | 1 | 0.1.0 | 2026-05-20 | Foundation |
 | 2 | 0.2.0 | 2026-05-20 | Data Model |
 | 3 | 0.3.0 | 2026-05-20 | State |
-| 4 | 0.4.0 | — | AI Provider |
+| 4 | 0.4.0 | 2026-05-20 | AI Provider |
 | 5 | 0.5.0 | — | Home |
 | 6 | 0.6.0 | — | Step 1 |
 | 7 | 0.7.0 | — | Step 2 Canvas |
