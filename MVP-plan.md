@@ -81,7 +81,7 @@ web-content-app/
 | 2 | ✅ | Data Model & Type Layer | — |
 | 3 | ✅ | State Management & Persistence | — |
 | 4 | ✅ | AI Provider Abstraction & Prompts | US-013, US-015 (backend) |
-| 5 | ⬜ | Home & Project Lifecycle | S-00, S-01 · US-006/7/8/9 |
+| 5 | ✅ | Home & Project Lifecycle | S-00, S-01 · US-006/7/8/9 |
 | 6 | ⬜ | Step 1 — Input & UX Analysis | S-02 · US-001 |
 | 7 | ⬜ | Step 2 — Sitemap Canvas | S-03 · US-002/3/10 |
 | 8 | ⬜ | Step 3 — Brand Voice | S-04 · US-004 |
