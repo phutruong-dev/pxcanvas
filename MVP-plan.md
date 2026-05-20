@@ -79,7 +79,7 @@ web-content-app/
 | 0 | ✅ | Folder Restructure (Villa T → reference) | — |
 | 1 | ✅ | Foundation & AI-friendly Docs | — |
 | 2 | ✅ | Data Model & Type Layer | — |
-| 3 | ⬜ | State Management & Persistence | — |
+| 3 | ✅ | State Management & Persistence | — |
 | 4 | ⬜ | AI Provider Abstraction & Prompts | US-013, US-015 (backend) |
 | 5 | ⬜ | Home & Project Lifecycle | S-00, S-01 · US-006/7/8/9 |
 | 6 | ⬜ | Step 1 — Input & UX Analysis | S-02 · US-001 |
@@ -164,13 +164,13 @@ web-content-app/
 **Goal:** Zustand stores + localStorage layer chạy được.
 
 ### Tasks
-- [ ] `src/lib/store/projects.ts` — list, add, rename, delete, duplicate, get-by-id + persist
-- [ ] `src/lib/store/workflow.ts` — currentProject, sitemap, brandVoice, content, ux improvements + persist per project
-- [ ] `src/lib/store/settings.ts` — provider mode, API key, output folder + persist
-- [ ] `src/lib/store/undo-redo.ts` — generic undo stack (≥20 steps)
-- [ ] `src/lib/utils/debounce.ts` — debounced auto-save (1s)
-- [ ] Handler localStorage quota exceeded → toast (PRD §⑦)
-- [ ] Viết `docs/state-management.md` — store map, subscribe pattern, persist strategy
+- [x] `src/lib/store/projects.ts` — list, add, rename, delete, duplicate, get-by-id + persist
+- [x] `src/lib/store/workflow.ts` — per-project state, dynamic localStorage, debounced 1s, tree helpers
+- [x] `src/lib/store/settings.ts` — provider mode, API key, output folder, model, debug logging
+- [x] `src/lib/store/undo-redo.ts` — stack max 20, push/undo/redo + deep clone
+- [x] `src/lib/utils/debounce.ts`
+- [ ] Handler localStorage quota exceeded → toast (implement in Phase 5 khi có Sonner setup)
+- [x] `docs/state-management.md` — viết ở Phase 1
 
 ### Done khi
 - Demo page tạo project, refresh giữ state
@@ -362,7 +362,7 @@ web-content-app/
 |---|---|---|---|
 | 1 | 0.1.0 | 2026-05-20 | Foundation |
 | 2 | 0.2.0 | 2026-05-20 | Data Model |
-| 3 | 0.3.0 | — | State |
+| 3 | 0.3.0 | 2026-05-20 | State |
 | 4 | 0.4.0 | — | AI Provider |
 | 5 | 0.5.0 | — | Home |
 | 6 | 0.6.0 | — | Step 1 |
