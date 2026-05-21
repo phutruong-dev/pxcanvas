@@ -12,6 +12,12 @@
 ## [1.5.0] — Generate this page button in Step 4 · 2026-05-21
 
 ### Changed
+- `src/components/step-4/content-preview.tsx` — empty state now shows a "Generate this page" button instead of plain text
+- `src/app/project/[id]/step-4/page.tsx` — removed duplicate button from page header; single button lives in ContentPreview empty state only
+
+--- — Generate this page button in Step 4 · 2026-05-21
+
+### Changed
 - `src/app/project/[id]/step-4/page.tsx` — added "Generate this page" / "Regenerate" button in the selected-page header; always visible when a page is selected, disabled during batch run or when brand voice is missing
 - `src/components/step-4/content-preview.tsx` — empty state (no content yet) now shows a "Generate this page" button instead of plain text
 
