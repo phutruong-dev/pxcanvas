@@ -303,6 +303,30 @@ Map to wf-* components:
 - [ ] Required slots present
 - [ ] No inline `style=` except for slot-specific sizing (icon dimensions) — and even then, prefer wf-icon size modifiers
 
+### Step 8 — Update `UNDERSTANDING.md` (MANDATORY)
+
+`wireframe-library/UNDERSTANDING.md` is the catalog AI consults when picking a variation for a Sitemap section (Phase 16a). Every new variation MUST be appended here.
+
+Two updates per variation:
+
+**a) Quick Index table** (top of file)
+- Add the new variation ID to the row matching its primary content intent.
+- If no row matches → create a new intent row (group alphabetically).
+- Update "Section type coverage" totals.
+
+**b) Detail entry** (under the matching `## <section-type>` block)
+- Append a new `### <variation-id>` block in numerical order
+- Use the exact 5-field template:
+  ```
+  **Layout:** <one sentence visual description>
+  **When to use:** <bullet list of content intents>
+  **Content shape:** <required + optional + repeat-group slots with counts/limits>
+  **Avoid for:** <bullet list of anti-patterns with reason>
+  **See also:** <related variation IDs>
+  ```
+
+If unsure about "When to use" — look at similar approved variations and mirror their use-case framing. Be specific: "Key Features / Why Us / Service Highlights" beats "list of features".
+
 ---
 
 ## 6. DO / DON'T
@@ -381,10 +405,11 @@ For each N in [21..30]:
   ↓
   Read wireframe-design/feature-section/feature-section-<N>.jpg
   ↓
-  Follow §5 Decision Flow (Steps 1-7)
+  Follow §5 Decision Flow (Steps 1-8)
   ↓
   Write wireframe-library/feature-section/feature-section-<N>/index.html
   Write wireframe-library/feature-section/feature-section-<N>/meta.json
+  Append entry to wireframe-library/UNDERSTANDING.md (Quick Index + Detail)
   ↓
 After batch:
   ↓

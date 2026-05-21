@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+### Added — v1.0 Wireframe Library UNDERSTANDING catalog
+- `wireframe-library/UNDERSTANDING.md` — content intent → variation lookup for Phase 16a Sitemap→Wireframe matching. Quick Index table at top (content intent + item count + has-icons/CTAs/images → variation IDs) + detailed entry per variation (Layout / When to use / Content shape / Avoid for / See also)
+- Entries for `feature-section-2` (3-col bordered card grid for Key Features / Why Us / Amenities) and `feature-section-20` (badge cloud for tag list / skill list / categories)
+
+### Changed
+- `wireframe-library/AI-GENERATION-RULES.md` — Decision Flow extended to 8 steps; Step 8 mandates appending to UNDERSTANDING.md (Quick Index row + Detail block) for every new variation
+- `version-1.md` Quick Start — UNDERSTANDING.md listed as critical reference file; workflow paths updated to include the Edit step
+
 ### Added — v1.0 Wireframe Library variation 2
 - `wireframe-library/feature-section/feature-section-2/` — centered header + 3-col bordered card grid with 6 feature items (icon + title + body)
 

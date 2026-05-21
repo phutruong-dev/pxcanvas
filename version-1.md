@@ -21,11 +21,12 @@
 ### Workflow
 
 1. User yêu cầu generate batch variation N..M (ví dụ "generate 21-30").
-2. Với mỗi variation N trong batch (theo `AI-GENERATION-RULES.md §5 Decision Flow`):
+2. Với mỗi variation N trong batch (theo `AI-GENERATION-RULES.md §5 Decision Flow 8 steps`):
    - `Read` ảnh `wireframe-design/feature-section/feature-section-<N>.jpg`
    - Analyze: identify section type → layout family → blocks → compose wf-* components
    - `Write` `wireframe-library/feature-section/feature-section-<N>/index.html` (**folder name = JPG stem, KHÔNG zero-pad**)
    - `Write` `wireframe-library/feature-section/feature-section-<N>/meta.json`
+   - **`Edit` `wireframe-library/UNDERSTANDING.md`** — append entry (Quick Index row + Detail block)
 3. Sau batch: `npm run wireframe:validate` → confirm pass
 4. User mở browser xem từng `index.html` so với JPG (cross-reference dễ vì cùng stem name)
 
@@ -33,12 +34,13 @@
 
 | File | Vai trò |
 |---|---|
-| `wireframe-library/AI-GENERATION-RULES.md` | **Bible** — component catalog + decision flow + DO/DON'T |
+| `wireframe-library/AI-GENERATION-RULES.md` | **Bible** — component catalog + 8-step decision flow + DO/DON'T |
+| `wireframe-library/UNDERSTANDING.md` | **Catalog** — content intent → variation lookup (for Phase 16a Sitemap→Wireframe matching). Append entry per new variation. |
 | `wireframe-library/_shared/wireframe-components.css` | Component class definitions (`wf-section`, `wf-h2`, `wf-btn`, etc.) |
 | `wireframe-library/_shared/pxpace.css` | Design tokens (CSS variables) |
 | `wireframe-library/_shared/wireframe-base.css` | Slot debug overlay |
 | `src/lib/wireframes/slot-schema.ts` | Slot key enum per section type |
-| `wireframe-library/feature-section/020/` | Reference pilot — mirror this structure |
+| `wireframe-library/feature-section/feature-section-20/` | Reference pilot — mirror this structure |
 
 ### KHÔNG
 - ❌ Không invent CSS class — chỉ dùng `wf-*` từ `wireframe-components.css` hoặc utility từ `pxpace.css`
