@@ -9,6 +9,20 @@
 
 ---
 
+## [1.6.0] — Step 4 redesign: 3-col layout + MD preview + per-section generate · 2026-05-21
+
+### Added
+- `src/components/step-4/sections-panel.tsx` — new center column: section list with status dots (idle/generating/done), click to select section for preview, hover to show per-section Generate/Regen button, "Edit sections" collapsible toggle, "Generate page" button
+- `src/lib/utils/markdown-sections.ts` — `extractSectionFromMd`, `patchSectionInMd`, `sectionExistsInMd` utilities for section-level markdown operations
+- Per-section generate: `generateSection(node, section)` calls `/api/ai/content` with one section, extracts the `## heading` block from response and patches it into the full page markdown; other sections are untouched
+
+### Changed
+- `src/app/project/[id]/step-4/page.tsx` — 3-column layout (PageList | SectionsPanel | ContentPreview); new state `selectedSectionId`, `sectionGeneratingIds`; removed old stacked SectionEditor+ContentPreview layout; clicking a page also resets selected section
+- `src/components/step-4/content-preview.tsx` — replaced `<pre>` raw markdown with `react-markdown` + `remark-gfm` (proper headings, lists, bold, blockquote, etc.); accepts `selectedSection` prop to filter view to a single section; toolbar shows "Full page" / section name toggle with ✕ to clear
+- Installed `react-markdown`, `remark-gfm`
+
+---
+
 ## [1.5.0] — Generate this page button in Step 4 · 2026-05-21
 
 ### Changed

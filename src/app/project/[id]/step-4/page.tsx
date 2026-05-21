@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { ArrowLeft, Download, FolderOutput, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import PageList from "@/components/step-4/page-list"
-import SectionEditor from "@/components/step-4/section-editor"
+import SectionsPanel from "@/components/step-4/sections-panel"
 import ContentPreview from "@/components/step-4/content-preview"
 import BatchProgress from "@/components/step-4/batch-progress"
 import OverwriteModal, { type OverwriteDecision } from "@/components/step-4/overwrite-modal"
@@ -14,6 +14,7 @@ import { useWorkflowStore } from "@/lib/store/workflow"
 import { useSettingsStore } from "@/lib/store/settings"
 import { useProjectsStore } from "@/lib/store/projects"
 import { flattenTree } from "@/lib/utils/sitemap-layout"
+import { extractSectionFromMd, patchSectionInMd } from "@/lib/utils/markdown-sections"
 import type { Section } from "@/lib/types/content"
 import type { SitemapNode } from "@/lib/types/sitemap"
 
@@ -41,26 +42,34 @@ export default function Step4Page() {
   const outputFolder = useSettingsStore((s) => s.outputFolder)
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
+  const [sectionGeneratingIds, setSectionGeneratingIds] = useState<Set<string>>(new Set())
+
   const [batchRunning, setBatchRunning] = useState(false)
   const [batchDone, setBatchDone] = useState(0)
   const [batchFailed, setBatchFailed] = useState<string[]>([])
   const [batchCancelled, setBatchCancelled] = useState(false)
 
-  // Overwrite modal state
   const [overwriteFile, setOverwriteFile] = useState<string | null>(null)
   const overwriteResolve = useRef<((d: OverwriteDecision, slug?: string) => void) | null>(null)
-
   const cancelRef = useRef(false)
+
   const settings = { provider, apiKey, aiModel, debugLogging }
-
   const pages = flattenTree(sitemap)
-
   const statuses = Object.fromEntries(
     pages.map((p) => [p.id, pageContents[p.id]?.status ?? "idle"]),
   )
 
   const selectedPage = selectedId ? pages.find((p) => p.id === selectedId) ?? null : null
   const selectedContent = selectedId ? pageContents[selectedId] ?? null : null
+  const selectedSection = selectedSectionId && selectedContent
+    ? (selectedContent.sections ?? []).find((s) => s.id === selectedSectionId) ?? null
+    : null
+
+  function selectPage(pageId: string) {
+    setSelectedId(pageId)
+    setSelectedSectionId(null)
+  }
 
   async function generateOnePage(node: SitemapNode, abortSignal?: boolean): Promise<boolean> {
     if (abortSignal) return false
@@ -75,7 +84,6 @@ export default function Step4Page() {
     })
 
     try {
-      // Step 1: propose sections if not already set
       let sections = existing?.sections?.length ? existing.sections : []
       if (!sections.length) {
         const secRes = await fetch("/api/ai/sections", {
@@ -92,16 +100,10 @@ export default function Step4Page() {
         sections = secJson.data as Section[]
       }
 
-      // Step 2: generate content
       const ctRes = await fetch("/api/ai/content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pageNode: node,
-          sections,
-          brandVoice,
-          settings,
-        }),
+        body: JSON.stringify({ pageNode: node, sections, brandVoice, settings }),
       })
       const ctJson = await ctRes.json()
       if (!ctRes.ok || ctJson.error) throw new Error(ctJson.error ?? "Content failed")
@@ -117,24 +119,57 @@ export default function Step4Page() {
       return true
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
+      const existing2 = pageContents[node.id]
       setPageContent(node.id, {
         pageId: node.id,
-        sections: existing?.sections ?? [],
-        markdown: existing?.markdown ?? "",
+        sections: existing2?.sections ?? [],
+        markdown: existing2?.markdown ?? "",
         status: "error",
         generatedAt: null,
         errorMessage: msg,
       })
       return false
+    }
+  }
+
+  async function generateSection(node: SitemapNode, section: Section) {
+    if (!brandVoice) { toast.error("Brand voice missing — complete Step 3 first."); return }
+    setSectionGeneratingIds((prev) => new Set([...prev, section.id]))
+    try {
+      const res = await fetch("/api/ai/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pageNode: node, sections: [section], brandVoice, settings }),
+      })
+      const json = await res.json()
+      if (!res.ok || json.error) throw new Error(json.error ?? "Content failed")
+
+      const newSectionMd = extractSectionFromMd(json.data as string, section.name)
+      const existing = pageContents[node.id]
+      const patched = patchSectionInMd(existing?.markdown ?? "", section.name, newSectionMd || json.data)
+
+      setPageContent(node.id, {
+        pageId: node.id,
+        sections: existing?.sections ?? [section],
+        markdown: patched,
+        status: "done",
+        generatedAt: new Date().toISOString(),
+        errorMessage: null,
+      })
+      toast.success(`"${section.name}" generated`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Section generation failed")
     } finally {
+      setSectionGeneratingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(section.id)
+        return next
+      })
     }
   }
 
   async function generateAll(targetPages: SitemapNode[] = pages) {
-    if (!brandVoice) {
-      toast.error("Brand voice is missing — complete Step 3 first.")
-      return
-    }
+    if (!brandVoice) { toast.error("Brand voice is missing — complete Step 3 first."); return }
     cancelRef.current = false
     setBatchCancelled(false)
     setBatchRunning(true)
@@ -163,9 +198,7 @@ export default function Step4Page() {
     }
   }
 
-  function handleCancel() {
-    cancelRef.current = true
-  }
+  function handleCancel() { cancelRef.current = true }
 
   async function handleRetryFailed() {
     const failedPages = pages.filter((p) => pageContents[p.id]?.status === "error")
@@ -176,19 +209,12 @@ export default function Step4Page() {
     if (!selectedId) return
     const existing = pageContents[selectedId]
     setPageContent(selectedId, {
-      ...(existing ?? {
-        pageId: selectedId,
-        markdown: "",
-        status: "idle",
-        generatedAt: null,
-        errorMessage: null,
-      }),
+      ...(existing ?? { pageId: selectedId, markdown: "", status: "idle", generatedAt: null, errorMessage: null }),
       sections,
     })
     toast.success("Sections saved")
   }
 
-  // Write to folder with overwrite modal
   async function askOverwrite(filePath: string): Promise<{ decision: OverwriteDecision; slug?: string }> {
     return new Promise((resolve) => {
       setOverwriteFile(filePath)
@@ -201,47 +227,33 @@ export default function Step4Page() {
   }
 
   async function writeToFolder() {
-    if (!outputFolder?.trim()) {
-      toast.error("Set an output folder in Settings first.")
-      return
-    }
-    const donePPages = pages.filter((p) => pageContents[p.id]?.status === "done")
-    if (donePPages.length === 0) {
-      toast.error("No generated pages to write — generate content first.")
-      return
-    }
+    if (!outputFolder?.trim()) { toast.error("Set an output folder in Settings first."); return }
+    const donePages = pages.filter((p) => pageContents[p.id]?.status === "done")
+    if (donePages.length === 0) { toast.error("No generated pages to write — generate content first."); return }
 
-    // Check folder first
     const checkRes = await fetch("/api/files/check-folder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path: outputFolder }),
     })
     const checkJson = await checkRes.json()
-    if (!checkJson.writable) {
-      toast.error(`Cannot write to folder: ${checkJson.error}`)
-      return
-    }
+    if (!checkJson.writable) { toast.error(`Cannot write to folder: ${checkJson.error}`); return }
 
-    let written = 0
-    let skipped = 0
-    for (const node of donePPages) {
+    let written = 0, skipped = 0
+    for (const node of donePages) {
       const content = pageContents[node.id]
       if (!content?.markdown) continue
       let slug = slugify(node.name)
-
       const writeRes = await fetch("/api/files/write-content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ outputFolder, slug, markdown: content.markdown }),
       })
       const writeJson = await writeRes.json()
-
       if (writeJson.existed) {
         const { decision, slug: newSlug } = await askOverwrite(writeJson.path ?? `${outputFolder}/${slug}.md`)
         if (decision === "skip") { skipped++; continue }
         if (decision === "rename" && newSlug) slug = newSlug
-        // Re-write with decision
         const rewriteRes = await fetch("/api/files/write-content", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -255,34 +267,20 @@ export default function Step4Page() {
       }
       written++
     }
-
     toast.success(`Written ${written} file(s)${skipped ? ` (${skipped} skipped)` : ""} to ${outputFolder}`)
   }
 
   async function exportZip() {
     if (!project) return
     const donePages = pages.filter((p) => pageContents[p.id]?.status === "done")
-    if (donePages.length === 0) {
-      toast.error("Generate content first.")
-      return
-    }
-
+    if (donePages.length === 0) { toast.error("Generate content first."); return }
     try {
       const res = await fetch("/api/files/export-zip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          projectName: project.name,
-          sitemap,
-          brandVoice,
-          pageContents,
-        }),
+        body: JSON.stringify({ projectName: project.name, sitemap, brandVoice, pageContents }),
       })
-      if (!res.ok) {
-        const j = await res.json()
-        toast.error(j.error ?? "Export failed")
-        return
-      }
+      if (!res.ok) { const j = await res.json(); toast.error(j.error ?? "Export failed"); return }
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -298,9 +296,7 @@ export default function Step4Page() {
     }
   }
 
-  if (projectId !== id) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading…</div>
-  }
+  if (projectId !== id) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>
 
   if (!sitemap) {
     return (
@@ -316,14 +312,18 @@ export default function Step4Page() {
   }
 
   const batchTotal = batchRunning ? pages.length : 0
+  const defaultContent = selectedPage
+    ? { pageId: selectedPage.id, sections: [], markdown: "", status: "idle" as const, generatedAt: null, errorMessage: null }
+    : null
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] flex-col">
+      {/* Top bar */}
       <div className="flex shrink-0 items-center justify-between border-b bg-background px-6 py-3">
         <div>
           <h1 className="text-base font-semibold">Generate Content</h1>
           <p className="text-xs text-muted-foreground">
-            Select a page to edit sections and preview content.
+            Select a page → click a section to preview it → hover a section to generate/regenerate.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -339,17 +339,14 @@ export default function Step4Page() {
             <Download className="mr-1.5 h-3.5 w-3.5" />
             Export ZIP
           </Button>
-          <Button
-            size="sm"
-            onClick={() => generateAll()}
-            disabled={batchRunning || !brandVoice}
-          >
+          <Button size="sm" onClick={() => generateAll()} disabled={batchRunning || !brandVoice}>
             <Zap className="mr-1.5 h-3.5 w-3.5" />
             Generate All
           </Button>
         </div>
       </div>
 
+      {/* Batch progress */}
       {(batchRunning || batchDone > 0 || batchFailed.length > 0) && (
         <div className="shrink-0 px-6 py-3">
           <BatchProgress
@@ -363,54 +360,54 @@ export default function Step4Page() {
         </div>
       )}
 
+      {/* 3-column body */}
       <div className="flex flex-1 overflow-hidden">
+        {/* Col 1: Page list */}
         <PageList
           pages={pages}
           statuses={statuses}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={selectPage}
           onRegen={(pageId) => {
             const node = pages.find((p) => p.id === pageId)
             if (node) void generateOnePage(node)
           }}
         />
 
-        <main className="flex flex-1 flex-col overflow-hidden">
-          {selectedPage && selectedContent !== undefined ? (
-            <>
-              <div className="shrink-0 border-b bg-muted/20 px-4 py-3">
-                <h2 className="mb-2 text-sm font-semibold">{selectedPage.name} — Sections</h2>
-                <SectionEditor
-                  key={selectedPage.id}
-                  sections={selectedContent?.sections ?? []}
-                  onSave={handleSaveSections}
-                  disabled={selectedContent?.status === "generating"}
-                />
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <ContentPreview
-                  content={
-                    selectedContent ?? {
-                      pageId: selectedPage.id,
-                      sections: [],
-                      markdown: "",
-                      status: "idle",
-                      generatedAt: null,
-                      errorMessage: null,
-                    }
-                  }
-                  blacklist={brandVoice?.blacklist ?? []}
-                  onRegen={() => generateOnePage(selectedPage)}
-                  regenDisabled={batchRunning}
-                />
-              </div>
-            </>
-          ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Select a page from the sidebar to view and edit its content.
-            </div>
-          )}
-        </main>
+        {/* Col 2: Sections panel — only when a page is selected */}
+        {selectedPage ? (
+          <>
+            <SectionsPanel
+              page={selectedPage}
+              sections={selectedContent?.sections ?? []}
+              pageContent={selectedContent}
+              sectionGeneratingIds={sectionGeneratingIds}
+              selectedSectionId={selectedSectionId}
+              onSelectSection={setSelectedSectionId}
+              onGenerateSection={(s) => void generateSection(selectedPage, s)}
+              onGeneratePage={() => void generateOnePage(selectedPage)}
+              onSaveSections={handleSaveSections}
+              batchRunning={batchRunning}
+              hasBrandVoice={!!brandVoice}
+            />
+
+            {/* Col 3: Content preview */}
+            <main className="flex flex-1 flex-col overflow-hidden">
+              <ContentPreview
+                content={selectedContent ?? defaultContent!}
+                blacklist={brandVoice?.blacklist ?? []}
+                onRegen={() => void generateOnePage(selectedPage)}
+                regenDisabled={batchRunning}
+                selectedSection={selectedSection}
+                onClearSection={() => setSelectedSectionId(null)}
+              />
+            </main>
+          </>
+        ) : (
+          <main className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+            Select a page from the sidebar to get started.
+          </main>
+        )}
       </div>
 
       <OverwriteModal
