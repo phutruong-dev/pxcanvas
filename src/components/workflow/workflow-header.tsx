@@ -8,9 +8,12 @@ import StepIndicator from "./step-indicator"
 type Props = {
   projectName: string
   step: 1 | 2 | 3 | 4
+  maxReached: 1 | 2 | 3 | 4
+  savingStatus: "idle" | "pending" | "saved"
+  onNavigate: (step: 1 | 2 | 3 | 4) => void
 }
 
-export default function WorkflowHeader({ projectName, step }: Props) {
+export default function WorkflowHeader({ projectName, step, maxReached, savingStatus, onNavigate }: Props) {
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-6">
@@ -23,7 +26,13 @@ export default function WorkflowHeader({ projectName, step }: Props) {
         </div>
 
         <div className="flex items-center gap-4">
-          <StepIndicator current={step} />
+          {savingStatus === "pending" && (
+            <span className="text-[11px] text-amber-600">Saving…</span>
+          )}
+          {savingStatus === "saved" && (
+            <span className="text-[11px] text-muted-foreground">All changes saved</span>
+          )}
+          <StepIndicator current={step} maxReached={maxReached} onNavigate={onNavigate} />
           <Link href="/settings">
             <Button variant="ghost" size="icon" aria-label="Settings">
               <Settings className="h-4 w-4" />

@@ -27,6 +27,7 @@ function newProject(name: string): Project {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     currentStep: 1,
+    maxReachedStep: 1,
   }
 }
 
@@ -76,7 +77,14 @@ export const useProjectsStore = create<ProjectsStore>()(
       updateProjectStep: (id, step) => {
         set((s) => ({
           projects: s.projects.map((p) =>
-            p.id === id ? { ...p, currentStep: step, updatedAt: new Date().toISOString() } : p
+            p.id === id
+              ? {
+                  ...p,
+                  currentStep: step,
+                  maxReachedStep: (Math.max(p.maxReachedStep ?? 1, step) as 1 | 2 | 3 | 4),
+                  updatedAt: new Date().toISOString(),
+                }
+              : p
           ),
         }))
       },

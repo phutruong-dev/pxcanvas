@@ -9,6 +9,20 @@
 
 ---
 
+## [1.8.0] — Free step navigation + save indicator · 2026-05-21
+
+### Added
+- `maxReachedStep` field on `Project` type — tracks highest step ever visited, never decreases when navigating back
+- Save status indicator in workflow header: "Saving…" (amber) and "All changes saved" (muted) — visible on all steps
+
+### Changed
+- `src/lib/store/projects.ts` — `updateProjectStep` now uses `Math.max` to update `maxReachedStep`; `newProject` initializes `maxReachedStep: 1`
+- `src/components/workflow/step-indicator.tsx` — accepts `maxReached` + `onNavigate` props; steps ≤ `maxReached` render as clickable buttons with checkmark; future steps remain dimmed/non-interactive
+- `src/components/workflow/workflow-header.tsx` — forwards `maxReached`, `onNavigate`, `savingStatus` props to StepIndicator and save indicator
+- `src/app/project/[id]/layout.tsx` — reads `maxReachedStep` from projects store and `savingStatus` from workflow store; passes both through to header; adds `useRouter` for step navigation
+
+---
+
 ## [1.7.0] — Structured section content: eyebrow + headline + description · 2026-05-21
 
 ### Changed

@@ -4,6 +4,7 @@ export type Project = {
   createdAt: string    // ISO 8601
   updatedAt: string    // ISO 8601
   currentStep: 1 | 2 | 3 | 4
+  maxReachedStep: 1 | 2 | 3 | 4  // highest step ever visited, never decreases
 }
 
 export type ProjectZipMeta = {
