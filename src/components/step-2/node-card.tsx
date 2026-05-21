@@ -9,6 +9,8 @@ import { useWorkflowStore } from "@/lib/store/workflow"
 import { useCanvasContext } from "./canvas-context"
 import type { SitemapNode } from "@/lib/types/sitemap"
 
+const EMPTY_SECTIONS: import("@/lib/types/content").Section[] = []
+
 function findInTree(root: SitemapNode, id: string): SitemapNode | null {
   if (root.id === id) return root
   for (const c of root.children) {
@@ -20,8 +22,7 @@ function findInTree(root: SitemapNode, id: string): SitemapNode | null {
 
 function NodeCardImpl({ id }: NodeProps) {
   const node = useWorkflowStore((s) => (s.sitemap ? findInTree(s.sitemap, id) : null))
-  const sections = useWorkflowStore((s) => s.pageContents[id]?.sections ?? [])
-  const pageContents = useWorkflowStore((s) => s.pageContents)
+  const sections = useWorkflowStore((s) => s.pageContents[id]?.sections ?? EMPTY_SECTIONS)
   const setPageContent = useWorkflowStore((s) => s.setPageContent)
   const { selectedId, hoverTargetId, onAddChild } = useCanvasContext()
 
@@ -53,7 +54,7 @@ function NodeCardImpl({ id }: NodeProps) {
     const next = [...sections]
     const [moved] = next.splice(dragIdx, 1)
     next.splice(i, 0, moved)
-    const existing = pageContents[id]
+    const existing = useWorkflowStore.getState().pageContents[id]
     if (existing) setPageContent(id, { ...existing, sections: next })
     setDragIdx(null)
     setHoverIdx(null)
