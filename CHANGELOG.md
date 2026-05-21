@@ -9,6 +9,18 @@
 
 ---
 
+## [1.4.0] — UX polish: wider side panel + Auto-layout button · 2026-05-21
+
+### Added
+- `src/components/step-2/canvas-toolbar.tsx` — "Auto-layout" button (LayoutGrid icon) re-applies computed node positions and fits the viewport; useful after generating sections or adding pages
+
+### Changed
+- `src/components/step-2/side-panel.tsx` — Page Detail panel widened from `w-80` (320px) to `w-[37.5rem]` (600px)
+- `src/components/step-2/sitemap-canvas.tsx` — accepts `layoutKey` prop; re-applies layout when key changes
+- `src/app/project/[id]/step-2/page.tsx` — manages `layoutKey` state; passes `onAutoLayout` to toolbar and `layoutKey` to canvas
+
+---
+
 ## [1.3.0] — Dynamic canvas layout — no more node overlap · 2026-05-21
 
 ### Changed
