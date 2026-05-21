@@ -24,10 +24,15 @@ function formatBrandVoice(bv: BrandVoice): string {
 
 const FORMAT_RULES = `
 - Start with # page title
-- Use ## for each section heading, matching the section names provided
-- Use ### or #### for subsections/cards within a section
-- Write in plain markdown — no HTML, no tables, no image syntax
+- Each section must follow this exact structure in order:
+  1. ## Section Name          — matches name from the sections list exactly
+  2. **EYEBROW LABEL**        — 2–5 ALL CAPS words (context/category label, e.g. WHY US, HOW IT WORKS)
+  3. ### Main Headline        — 5–12 words, benefit-focused, attention-grabbing
+  4. Short description.       — 1–2 sentences of supporting copy (20–40 words)
+  5. [section body]           — #### for cards/feature items, bullets for lists, CTAs
+- Use #### (not ###) for cards and feature items within a section
 - CTAs: write as **[CTA label]** on their own line
+- Write in plain markdown — no HTML, no tables, no image syntax
 - Do NOT include SEO meta, alt text, italics, or lorem ipsum
 - Keep all blacklist words out of the copy
 `.trim()

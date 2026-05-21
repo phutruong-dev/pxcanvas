@@ -9,6 +9,15 @@
 
 ---
 
+## [1.7.0] — Structured section content: eyebrow + headline + description · 2026-05-21
+
+### Changed
+- `src/app/api/ai/content/route.ts` — `FORMAT_RULES` updated: each section now requires a 4-part structure: `## Section Name` → `**EYEBROW LABEL**` (2–5 ALL CAPS words) → `### Main Headline` (5–12 words) → short description (1–2 sentences) → body content with `####` for cards
+- `prompts/05-content-generate.md` — task instructions updated to enforce eyebrow → headline → description structure per section
+- `src/lib/ai/prompt-loader.ts` — DEFAULTS["05-content-generate"] synced
+
+---
+
 ## [1.6.0] — Step 4 redesign: 3-col layout + MD preview + per-section generate · 2026-05-21
 
 ### Added

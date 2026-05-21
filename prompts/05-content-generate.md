@@ -28,9 +28,10 @@ Critical rules:
 - Follow the exact markdown format specified in the Format Rules
 - Every word must respect the brand voice: use tone keywords, follow principles, avoid blacklist words
 - Write specific, concrete copy — no placeholders, no lorem ipsum
-- Each section gets a ## heading whose text matches the section name, each subsection/card gets ### or ####
+- Each section MUST include: ## heading → **EYEBROW** → ### Headline → description → body
+- Use #### for cards and feature items within a section (never ### for sub-items)
 - The body of each section should fulfill the description provided
-- Include all CTAs with exact labels per CTA label reference
+- Include all CTAs as **[CTA label]** on their own line
 - Do NOT add SEO meta, alt text for images, or italic text
 
 ## Output
