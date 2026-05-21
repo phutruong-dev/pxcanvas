@@ -7,6 +7,21 @@
 
 ## [Unreleased]
 
+### Added — v1.0 Phase 11 Foundation
+- `version-1.md` — plan for v1.0 wireframe library (Approach A: wireframe-first strict)
+- `src/lib/types/wireframe.ts` — `SectionType` enum (14 types), `WireframeSlot`/`WireframeVariation`/`WireframeMeta`/`LibraryCatalog` types
+- `src/lib/wireframes/slot-schema.ts` — slot definitions per section type (`feature-section`, `hero`, `cta`, `faq` fully defined; others stubbed)
+- `src/lib/wireframes/token-cheatsheet.ts` — compact pxpace.css class reference for AI Vision prompts
+- `src/lib/wireframes/meta-schema.ts` — runtime validators (no Zod), `formatVariationId`/`parseVariationId` helpers
+- `src/lib/wireframes/library-loader.ts` — cached loader for `library.json`, empty-fallback when library not yet built
+- `wireframe-library/_shared/pxpace.css` — snapshot of design tokens, locked to library version
+- `wireframe-library/_shared/wireframe-base.css` — slot debug overlay + placeholder icons
+- `docs/wireframe-library.md` — slot contract, folder layout, troubleshooting
+- `docs/decisions/0002-wireframe-library-static.md` — ADR: build-once + commit-to-repo
+
+### Changed
+- `src/lib/types/content.ts` — `Section` extended with optional `type`, `variationId`, `contentLockedAt` (required after migration wizard in Phase 17)
+
 ---
 
 ## [1.8.0] — Free step navigation + save indicator · 2026-05-21
