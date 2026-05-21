@@ -18,31 +18,45 @@ export type HtmlValidationResult = {
   warnings: string[]  // non-blocking — logged but not retried
 }
 
-const PXPACE_CSS_PATH = path.join(process.cwd(), "wireframe-library", "_shared", "pxpace.css")
+const SHARED_DIR = path.join(process.cwd(), "wireframe-library", "_shared")
+const SHARED_CSS_FILES = [
+  "pxpace.css",
+  "wireframe-components.css",
+  "wireframe-base.css",
+]
 
-// Cached set of known pxpace.css class names.
-let cachedPxpaceClasses: Set<string> | null = null
+// Cached set of all known class names across shared CSS files.
+let cachedKnownClasses: Set<string> | null = null
 
-async function getPxpaceClasses(): Promise<Set<string>> {
-  if (cachedPxpaceClasses) return cachedPxpaceClasses
+async function getKnownClasses(): Promise<Set<string>> {
+  if (cachedKnownClasses) return cachedKnownClasses
 
-  const css = await fs.readFile(PXPACE_CSS_PATH, "utf-8")
   const classes = new Set<string>()
-
   // Match class selectors: .class-name{ or .class-name  or .class-name, or .class-name:
-  const pattern = /\.([a-zA-Z][a-zA-Z0-9_-]*(?:--[a-zA-Z0-9_-]+)*)\s*[{,:>\s]/g
-  let m: RegExpExecArray | null
-  while ((m = pattern.exec(css)) !== null) {
-    classes.add(m[1])
+  // Allow BEM-style: .wf-foo__bar, .wf-foo--mod, .wf-foo-1
+  const pattern = /\.([a-zA-Z][a-zA-Z0-9_-]*(?:__[a-zA-Z0-9_-]+)?(?:--[a-zA-Z0-9_-]+)*)\s*[{,:>\s]/g
+
+  for (const filename of SHARED_CSS_FILES) {
+    const filePath = path.join(SHARED_DIR, filename)
+    let css: string
+    try {
+      css = await fs.readFile(filePath, "utf-8")
+    } catch {
+      continue // file optional
+    }
+    let m: RegExpExecArray | null
+    while ((m = pattern.exec(css)) !== null) {
+      classes.add(m[1])
+    }
   }
 
-  cachedPxpaceClasses = classes
+  cachedKnownClasses = classes
   return classes
 }
 
 /** Clear class cache (test/dev use). */
 export function clearPxpaceClassCache(): void {
-  cachedPxpaceClasses = null
+  cachedKnownClasses = null
 }
 
 export async function validateWireframeHtml(
@@ -52,26 +66,26 @@ export async function validateWireframeHtml(
   const errors: string[] = []
   const warnings: string[] = []
 
-  // 1. <section root
-  if (!/^\s*<section[\s>]/i.test(html.trim())) {
-    errors.push('HTML must start with a <section> element')
+  // 1. <section present (file may be full HTML page or bare fragment)
+  if (!/<section[\s>]/i.test(html)) {
+    errors.push('HTML must contain a <section> element')
   }
 
   // 2. Extract all class="" values
-  const pxpaceClasses = await getPxpaceClasses()
+  const knownClasses = await getKnownClasses()
   const classPattern = /class="([^"]*)"/g
   const unknownClasses = new Set<string>()
   let cm: RegExpExecArray | null
   while ((cm = classPattern.exec(html)) !== null) {
     const classList = cm[1].trim().split(/\s+/).filter(Boolean)
     for (const cls of classList) {
-      if (!pxpaceClasses.has(cls)) {
+      if (!knownClasses.has(cls)) {
         unknownClasses.add(cls)
       }
     }
   }
   if (unknownClasses.size > 0) {
-    warnings.push(`Unknown CSS classes (should only use pxpace.css): ${[...unknownClasses].slice(0, 10).join(", ")}${unknownClasses.size > 10 ? ` ...+${unknownClasses.size - 10} more` : ""}`)
+    warnings.push(`Unknown CSS classes (should only use pxpace.css + wireframe-components.css): ${[...unknownClasses].slice(0, 10).join(", ")}${unknownClasses.size > 10 ? ` ...+${unknownClasses.size - 10} more` : ""}`)
   }
 
   // 3. Extract all data-slot values

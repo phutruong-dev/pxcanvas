@@ -5,6 +5,56 @@
 
 ---
 
+## ⚡ Quick start cho AI session tiếp theo
+
+**Phase hiện tại: 13 — Build Feature Section library (Claude Code session).**
+
+### BƯỚC ĐẦU TIÊN — BẮT BUỘC
+
+**Đọc `wireframe-library/AI-GENERATION-RULES.md`** — đây là bible cho việc generate HTML. Chứa:
+- Component catalog (`wf-*` classes)
+- Slot schema reference
+- Decision flow 7 bước khi đọc 1 JPG
+- DO/DON'T list
+- HTML wrapper template
+
+### Workflow
+
+1. User yêu cầu generate batch variation N..M (ví dụ "generate 21-30").
+2. Với mỗi variation N trong batch (theo `AI-GENERATION-RULES.md §5 Decision Flow`):
+   - `Read` ảnh `wireframe-design/feature-section/featuresection<N>.jpg`
+   - Analyze: identify section type → layout family → blocks → compose wf-* components
+   - `Write` `wireframe-library/feature-section/<NNN>/index.html` (NNN = zero-pad 3 digits)
+   - `Write` `wireframe-library/feature-section/<NNN>/meta.json`
+3. Sau batch: `npm run wireframe:validate` → confirm pass
+4. User mở browser xem từng `index.html` so với JPG
+
+### Files quan trọng (đọc trước generate)
+
+| File | Vai trò |
+|---|---|
+| `wireframe-library/AI-GENERATION-RULES.md` | **Bible** — component catalog + decision flow + DO/DON'T |
+| `wireframe-library/_shared/wireframe-components.css` | Component class definitions (`wf-section`, `wf-h2`, `wf-btn`, etc.) |
+| `wireframe-library/_shared/pxpace.css` | Design tokens (CSS variables) |
+| `wireframe-library/_shared/wireframe-base.css` | Slot debug overlay |
+| `src/lib/wireframes/slot-schema.ts` | Slot key enum per section type |
+| `wireframe-library/feature-section/020/` | Reference pilot — mirror this structure |
+
+### KHÔNG
+- ❌ Không invent CSS class — chỉ dùng `wf-*` từ `wireframe-components.css` hoặc utility từ `pxpace.css`
+- ❌ Không inline `style=` cho color/spacing/typography (chỉ cho slot-specific sizing nếu thực sự cần)
+- ❌ Không dùng `scripts/wireframe-generate.ts` (deprecated — cần API key)
+- ❌ Không cần `.env.local` / `ANTHROPIC_API_KEY`
+- ❌ Không translate placeholder text (Lorem ipsum, "Tagline", v.v. giữ nguyên từ JPG)
+
+### Khi cần pattern không có
+Nếu 5+ variation cần pattern mới (không có trong `wireframe-components.css`):
+1. **Dừng generate**
+2. Báo user: "Variation N cần pattern X. Thêm `.wf-X` vào components?"
+3. User quyết định extend hay rework
+
+---
+
 ## 🎯 Mục tiêu
 
 Đầu ra cuối cùng của user: thay vì chỉ có `.md` content, mỗi project xuất được **trang web wireframe HTML** ghép từ các template section dùng chung.
@@ -38,10 +88,9 @@
 3. **Mỗi variation 1 folder** — `index.html` + `meta.json`. Cấu trúc phẳng, dễ index, dễ ship.
 4. **Self-contained preview**: mỗi `index.html` link `pxpace.css` qua relative path → mở `file://` được, không cần server. Test/QA dễ.
 5. **Slot-first contract**: HTML có `data-slot="..."` trên mỗi node nội dung. Đây là **API ổn định** giữa template (cố định) và content (động per-project). Đổi slot key = breaking change library version.
-6. **AI Vision chỉ ở Library Builder (Track A)**. Track B (Project App) **không gọi AI Vision** — chỉ chọn template + map content (có thể AI text-only hoặc rule-based).
-7. **Prompt-driven cho Track A**, không hard-code layout analysis.
-8. **Token cheatsheet ≠ full CSS** — gửi AI 1 bản tóm tắt ~1-2KB.
-9. **Library frozen sau approve** — file approved không bị overwrite trừ khi explicit unfreeze. Bảo vệ template khỏi accidental regen.
+6. **Track A = Claude Code session, không CLI/API**. Phú dùng Claude Code (Mode A) yêu cầu AI đọc JPG → write HTML trực tiếp. KHÔNG cần `ANTHROPIC_API_KEY`, KHÔNG cần CLI generate script, KHÔNG cần multimodal API call code. Claude Code đã có vision sẵn.
+7. **Track B (Project App) không gọi AI Vision** — chỉ chọn template + map content (rule-based hoặc AI text-only).
+8. **Library frozen sau approve** — file approved không bị overwrite trừ khi explicit unfreeze.
 
 ---
 
@@ -84,25 +133,20 @@ web-content-app/
 │   │   └── _index.json
 │   └── hero/ ... (tương lai)
 │
-├── scripts/                            # NEW — Library Builder CLI (Track A)
-│   ├── wireframe-generate.ts           # CLI: gen 1 hoặc batch
-│   ├── wireframe-validate.ts           # CLI: validate library integrity
-│   ├── wireframe-thumbnail.ts          # CLI: render preview.png
-│   └── wireframe-freeze.ts             # CLI: lock approved, unfreeze cẩn trọng
+├── scripts/                            # Track A utilities (validate only)
+│   └── wireframe-validate.ts           # bulk library integrity check
+│   # NOTE: wireframe-generate.ts existed but is DEPRECATED (used API key approach).
+│   # Generation now happens via Claude Code session — see "Track A Workflow" section.
 │
 ├── prompts/
-│   └── 06-wireframe-from-image.md      # NEW — chỉ dùng ở Track A (CLI)
+│   # NOTE: 06-wireframe-from-image.md existed but is DEPRECATED (was for CLI Vision).
+│   # Claude Code reads JPG directly with its built-in vision capability.
 │
 ├── src/
 │   ├── app/
-│   │   ├── wireframes/                 # NEW — DEV ROUTE (gated, không cho user thường)
-│   │   │   └── page.tsx                # gallery + QA UI cho Phú khi build library
+│   │   ├── wireframes/                 # OPTIONAL — preview gallery (Track A QA)
+│   │   │   └── page.tsx                # static list of generated variations + iframe preview
 │   │   ├── api/
-│   │   │   ├── wireframes/             # NEW — dev-only routes, gated bằng env flag
-│   │   │   │   ├── generate/route.ts
-│   │   │   │   ├── batch/route.ts
-│   │   │   │   ├── approve/route.ts
-│   │   │   │   └── freeze/route.ts
 │   │   │   └── compose/route.ts        # NEW (Track B) — user-facing
 │   │   └── project/[id]/step-4/
 │   │       └── wireframe-tab.tsx       # NEW (Track B) — preview HTML page
@@ -203,57 +247,117 @@ export interface LibraryCatalog {
 
 ---
 
-## 🤖 Track A: Library Builder (build-once pipeline)
+## 🤖 Track A: Library Builder (Claude Code session)
 
-> Chỉ Phú chạy, không có trong UX user thường.
+> Phú yêu cầu Claude Code trong Cursor/CLI đọc JPG + write HTML. Không CLI script, không API key, không Vision pipeline code.
 
-### Workflow CLI
+### Workflow chuẩn (per batch ~10-20 variations)
 
+**1. Phú mở Claude Code session, nói:**
+> "Generate wireframe HTML cho feature-section variations N..M"
+
+**2. Claude Code làm tự động trong session:**
+- Lặp với mỗi N trong batch:
+  - `Read` tool đọc `wireframe-design/feature-section/featuresection<N>.jpg` (Read tool có multimodal support → AI nhìn được ảnh)
+  - Analyze layout: identify wrapper, columns, items, image/icon/button placeholders
+  - Map sang `data-slot` từ slot-schema (xem `src/lib/wireframes/slot-schema.ts`)
+  - `Write` tool tạo `wireframe-library/feature-section/<NNN>/index.html` (full HTML page wrapped)
+  - `Write` tool tạo `wireframe-library/feature-section/<NNN>/meta.json`
+
+**3. Phú review batch:**
+- Mở từng `index.html` trong browser (file://)
+- So sánh với JPG nguồn
+- Note variation nào layout sai → yêu cầu Claude Code regenerate
+
+**4. Sau khi pass cả 111:**
 ```bash
-# 1. Generate 1 variation để test prompt
-npm run wireframe:gen -- --type feature-section --variation 1
-
-# 2. Batch generate cả type (resumable, skip-existing)
-npm run wireframe:gen -- --type feature-section --all
-
-# 3. Mở dev UI để QA + approve (dev mode only)
-PXCANVAS_DEV=1 npm run dev
-# truy cập http://localhost:3000/wireframes
-
-# 4. Sau khi approve hết, freeze
-npm run wireframe:freeze -- --type feature-section
-
-# 5. Validate library trước commit
-npm run wireframe:validate
-
-# 6. Commit wireframe-library/ vào git
-git add wireframe-library/ && git commit -m "lib: feature-section v1.0 (111 variations)"
+npm run wireframe:validate   # bulk check meta + HTML
+git add wireframe-library/feature-section/
+git commit -m "lib: feature-section v1.0 (111 variations)"
 ```
 
-### AI Vision input/output
+### Quy tắc HTML Claude Code phải tuân (CHECKLIST khi generate)
 
-**Input:**
-- JPG (base64 hoặc file path)
-- Prompt 06 (role, constraint, slot schema, token cheatsheet)
+**File `index.html` wrapper:**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>feature-section — variation NN</title>
+  <link rel="stylesheet" href="../../_shared/pxpace.css">
+  <link rel="stylesheet" href="../../_shared/wireframe-base.css">
+</head>
+<body>
+{section fragment}
+</body>
+</html>
+```
 
-**Output JSON:**
+**Section fragment rules:**
+- Root: `<section class="padding-vertical-2xl padding-horizontal-l">` (điều chỉnh padding theo ảnh)
+- Mọi node nội dung có `data-slot="<key>"`
+- Slot key ∈ `src/lib/wireframes/slot-schema.ts` cho type tương ứng
+- Required slots phải xuất hiện (xem `getRequiredSlots(type)`)
+- Class CSS chỉ dùng từ `pxpace.css` (không invent class mới)
+- Wireframe styling: grayscale placeholder (`bg-base-10`, `bg-surface`), KHÔNG dùng brand color (`bg-primary`, etc.)
+
+**Placeholder conventions:**
+```html
+<!-- Image -->
+<div class="bg-base-10 radius-m full-width" style="aspect-ratio:16/9" data-slot="image-1"></div>
+
+<!-- Icon (circle gray) -->
+<div class="bg-base-10 radius-full" style="width:4rem;height:4rem" data-slot="feature-1-icon"></div>
+
+<!-- Primary button (filled dark) -->
+<button class="bg-secondary text-tertiary padding-vertical-2xs padding-horizontal-s radius-s font-500" data-slot="cta-primary">Contact now</button>
+
+<!-- Secondary button (outlined) -->
+<button class="border border-border text-title padding-vertical-2xs padding-horizontal-s radius-s font-500" data-slot="cta-secondary">See more</button>
+
+<!-- Eyebrow -->
+<span class="text-s font-600 text-title" data-slot="eyebrow">Tagline</span>
+
+<!-- Headline H2 -->
+<h2 class="text-3xl font-700 text-title line-height-s" data-slot="headline">Section headings</h2>
+
+<!-- Body description -->
+<p class="text-m text-body line-height-l" data-slot="description">Lorem ipsum dolor sit amet...</p>
+
+<!-- Feature card title -->
+<h4 class="text-l font-600 text-title" data-slot="feature-1-title">Feature name</h4>
+
+<!-- Feature card body -->
+<p class="text-m text-body line-height-l" data-slot="feature-1-body">Short description</p>
+
+<!-- Badge/chip (variation 20 style) -->
+<span class="bg-base-10 radius-full padding-vertical-2xs padding-horizontal-s text-m text-title" data-slot="feature-N-title">Label</span>
+```
+
+**File `meta.json` shape:**
 ```json
 {
-  "html": "<section class=\"...\">...</section>",
-  "layout": "split-image-2col",
-  "tags": ["image-heavy", "minimal"],
-  "slots_used": ["headline", "eyebrow", "image-1"]
+  "id": "feature-section-NNN",
+  "type": "feature-section",
+  "variation": <N>,
+  "sourceImage": "wireframe-design/feature-section/featuresection<N>.jpg",
+  "htmlPath": "wireframe-library/feature-section/<NNN>/index.html",
+  "layout": "<2-4 word layout tag>",
+  "tags": ["minimal" | "image-heavy" | "dark-bg" | "icon-grid" | "text-focus" | "2-col" | "3-col" | "4-col" | "card-layout" | "badge-chips" | "cta-focused" | "full-bleed" | "left-aligned" | "centered"],
+  "slots": [
+    { "key": "<slot-key>", "type": "text|image|icon|button|list", "required": <bool>, "description": "<short hint>" [, "repeatGroup": "feature", "repeatIndex": <N>] }
+  ],
+  "approved": false,
+  "frozen": false,
+  "libraryVersion": "1.0.0",
+  "generatedAt": "<ISO 8601>",
+  "generatedBy": "claude-opus-4-7"
 }
 ```
 
-**Validation pipeline:**
-1. HTML phải có `<section>` root
-2. Mọi class CSS ∈ pxpace.css (preload set class names build-time)
-3. Mọi `data-slot` ∈ slot schema của type
-4. Required slot present
-5. Retry tối đa 2 lần với error feedback
-
-### Token cheatsheet (~1-2KB string trong `token-cheatsheet.ts`)
+### Token cheatsheet (cho Claude Code khi cần lookup class names)
 
 ```
 COLORS: bg-/text-/border- × {primary, secondary, tertiary, base, surface, surface-2,
@@ -268,14 +372,20 @@ LAYOUT: columns-2..8, columns-min-{5..70}, flex-row, flex-column,
   col-span-N, col-start-N, row-span-N
 RESPONSIVE: columns-N--on-(xl|l|m|s), col-span-N--on-X
 WIDTH/HEIGHT: width-10..90, max-width-10..140, max-site-width, full-width, full-height
-ASPECT: aspect-1, aspect-16-9, aspect-4-3, etc.
-WIREFRAME PLACEHOLDER CONVENTION (cho v1.x — grayscale, không brand color):
-  - Image: <div class="bg-base-10 radius-m aspect-16-9" data-slot="image-N"></div>
-  - Icon: <div class="bg-base-10 radius-full" style="width:4rem;height:4rem" data-slot="feature-N-icon"></div>
-  - Button: <button class="bg-secondary text-tertiary padding-vertical-2xs padding-horizontal-s radius-s" data-slot="cta-primary">...</button>
-  - Heading: <h2 class="text-2xl font-700 text-title" data-slot="headline">...</h2>
-  - Body text: <p class="text-m text-body line-height-l" data-slot="description">...</p>
+ASPECT: aspect-1, aspect-16-9, aspect-4-3, aspect-3-2 etc.
 ```
+
+Hoặc xem trực tiếp `pxpace.css` để check class name. KHÔNG invent class.
+
+### Validation pipeline (validate.ts)
+
+`npm run wireframe:validate` chạy `scripts/wireframe-validate.ts`:
+1. Mỗi variation phải có `index.html` + `meta.json`
+2. `meta.json` pass `validateWireframeMeta()` (xem `src/lib/wireframes/meta-schema.ts`)
+3. HTML phải chứa `<section>` element
+4. Mọi class CSS ∈ pxpace.css
+5. Mọi `data-slot` ∈ slot schema của type
+6. Required slot present
 
 ---
 
@@ -370,19 +480,20 @@ Project cũ (Section thiếu `type`/`variationId`):
 
 | Phase | Track | Status | Title |
 |---|---|---|---|
-| 11 | A+B | ✅ | Foundation: types, slot schema, cheatsheet, library folder |
-| 12 | A | ✅ | Vision pipeline (CLI single + prompt + validate) |
-| 13 | A | ⬜ | Dev QA UI + batch runner (hidden behind `PXCANVAS_DEV=1`) |
-| 14 | A | ⬜ | Build Feature Section library (111 variation, approve, freeze) |
-| 15 | A | ⬜ | (Lặp lại P14 cho các section type khác — không khẩn cấp) |
+| 11 | A+B | ✅ | Foundation: types, slot schema, library folder, validator |
+| 12 | A | ⏸️ | ~~Vision pipeline CLI~~ — DEPRECATED (API key approach scrapped) |
+| 13 | A | 🚧 | **Build Feature Section library — Claude Code session batches** |
+| 14 | A | ⬜ | Optional preview gallery (`/wireframes` static viewer) |
+| 15 | A | ⬜ | Section Type Expansion (Hero/Header/Footer/...) — không khẩn cấp |
 | 16a | B | ⬜ | Section & Variation Planning (4a) |
 | 16b | B | ⬜ | Content Generation slot-constrained (4b) |
 | 16c | B | ⬜ | Compose & Preview (4c) |
 | 17 | B | ⬜ | Step 4 UI tích hợp + export + migration wizard |
 | 18 | B | ⬜ | Release v1.0 |
 
-**Track A (Phase 11-15)** ship riêng, không gate release v1.0. Có thể merge từng section type.
+**Track A (Phase 11, 13-15)** ship riêng, không gate release v1.0.
 **Track B (Phase 16-18)** là pre-requisite của release v1.0. Có thể chạy với chỉ Feature Section library (đủ demo).
+**Phase 12** giữ làm reference cho hậu thế — code đã commit nhưng deprecated (không xóa để có audit trail).
 
 ---
 
@@ -410,80 +521,97 @@ Project cũ (Section thiếu `type`/`variationId`):
 
 ---
 
-## Phase 12 — Vision Pipeline (CLI single) ✅
+## Phase 12 — ⏸️ DEPRECATED (API-key Vision pipeline approach)
 
-**Goal:** CLI sinh 1 variation HTML từ JPG, validate pass.
+> Approach này dựa trên giả định sai: user dùng Anthropic API key Mode B. Thực tế user dùng Claude CLI Mode A — không cần API key.
+> Code đã commit (`commit fa....`) nhưng KHÔNG dùng cho generation. Xem Phase 13 cho approach đúng.
 
-### Tasks
-- [x] `prompts/06-wireframe-from-image.md` — đầy đủ slot schema, token cheatsheet, output JSON format
-- [x] Mở rộng `src/lib/ai/anthropic-api.ts` — `callAnthropicApiWithImage()` multimodal
-- [x] `src/lib/ai/vision.ts` — wrapper: load JPG → base64, build prompt, parse JSON response, debug log
-- [x] `src/lib/wireframes/html-validate.ts` — class check (parse pxpace.css), slot check, required slot check
-- [x] `scripts/wireframe-generate.ts` — CLI: `--type`, `--variation N`, `--all`, `--skip-existing`, `--force`
-  - Retry max 2 lần với error feedback vào prompt
-  - Write `index.html` (wrapped `<html>`) + `meta.json`
-- [x] `scripts/wireframe-validate.ts` — bulk validate library integrity
-- [x] Log AI call vào `logs/ai-calls.jsonl` (debug flag)
-- [x] `package.json` scripts: `wireframe:gen`, `wireframe:validate`
-- [x] Extend `PromptKey` → `"06-wireframe-from-image"`
-- [ ] **Test tay 5 JPG** (cần user chạy với `.env.local` + `ANTHROPIC_API_KEY`)
+### Files giữ lại (dùng tham khảo, không xóa)
+- `prompts/06-wireframe-from-image.md` — prompt cho Vision API, không cần nữa nhưng có thể tham khảo
+- `src/lib/ai/anthropic-api.ts` — `callAnthropicApiWithImage()` không dùng, nhưng vô hại
+- `src/lib/ai/vision.ts` — dead code, không gọi từ đâu
+- `scripts/wireframe-generate.ts` — DEPRECATED, không chạy. Nếu chạy sẽ báo missing `ANTHROPIC_API_KEY`
 
-### Done khi
-- [x] `tsc --noEmit` pass
-- [x] Import + html-validate smoke test PASS
-- [ ] 5/5 HTML mở browser nhìn giống JPG → **cần user chạy CLI**
+### Files vẫn DÙNG (Phase 11 + 13 cần)
+- `src/lib/wireframes/html-validate.ts` — validator, dùng ở `wireframe:validate`
+- `scripts/wireframe-validate.ts` — bulk integrity check
+- `package.json` script `wireframe:validate`
+
+### Cleanup tùy chọn (không bắt buộc)
+- Có thể xóa vision.ts, wireframe-generate.ts, callAnthropicApiWithImage, 06 prompt nếu muốn repo gọn.
+- Không xóa: html-validate, wireframe-validate.
 
 ---
 
-## Phase 13 — Dev QA UI + Batch Runner
+## Phase 13 — Build Feature Section Library (Claude Code session)
 
-**Goal:** UI để Phú duyệt + chạy batch resumable.
+**Goal:** Tạo HTML + meta.json cho 111 feature-section variation, validate pass, commit.
 
-### Tasks
-- [ ] Env gate: `PXCANVAS_DEV=1` mới expose `/wireframes` + `/api/wireframes/*`
-- [ ] `app/wireframes/page.tsx` — gallery card grid theo type
-  - Filter status (pending/generated/approved/frozen)
-  - Action per card: regenerate, approve/reject, edit notes
-- [ ] `app/wireframes/[type]/[variation]/page.tsx` — detail 2-cột (JPG ↔ HTML iframe), slot debug toggle
-- [ ] API `/api/wireframes/generate` (gọi từ UI, wrap CLI logic)
-- [ ] API `/api/wireframes/batch` — SSE progress, concurrency 1, retry, skip-existing, resumable
-- [ ] API `/api/wireframes/approve` — flip `meta.approved`
-- [ ] `components/wireframes-dev/batch-runner.tsx`
-- [ ] `scripts/wireframe-freeze.ts` + API `/api/wireframes/freeze` — set `frozen:true`, prevent regen
+### Approach
+Phú mở Claude Code session, yêu cầu generate từng batch ~10-20 variation. Claude Code:
+1. Đọc JPG bằng `Read` tool (vision có sẵn)
+2. Analyze layout
+3. Write `wireframe-library/feature-section/<NNN>/index.html` + `meta.json` theo HTML conventions ở §Track A Workflow
 
-### Done khi
-- Chạy batch 10 ảnh đầu tiên trong UI, pause/resume OK
-- Approve + freeze hoạt động
+Đã xong: variation 020 (commit dạng pilot, đã validate pass).
 
----
-
-## Phase 14 — Build Feature Section Library
-
-**Goal:** library Feature Section hoàn thiện, frozen, commit.
-
-### Tasks
-- [ ] Chạy batch 111 ảnh, monitor failure
-- [ ] Tinh chỉnh prompt 06 dựa trên failure pattern, regenerate failed
-- [ ] Manual QA per variation (Phú click qua từng card)
-- [ ] Approve ≥ 80% (≥ 89 variation)
-- [ ] Reject + note variation không đạt (giữ lại để retry sau)
-- [ ] Generate `library.json` catalog
-- [ ] Generate thumbnail `preview.png` toàn bộ
-- [ ] Freeze approved
+### Tasks (Phú execute với Claude Code)
+- [x] Variation 020 pilot — validate pass, layout đúng
+- [ ] Variation 001-019 (batch 1: ~10 variations/session)
+- [ ] Variation 021-040 (batch 2)
+- [ ] Variation 041-060 (batch 3)
+- [ ] Variation 061-080 (batch 4)
+- [ ] Variation 081-100 (batch 5)
+- [ ] Variation 101-111 (batch 6)
+- [ ] Per batch: Phú open browser + so sánh với JPG nguồn → request re-generate variation lỗi
+- [ ] Sau khi 111 xong: `npm run wireframe:validate` pass cả 111
+- [ ] Generate `wireframe-library/library.json` catalog (script hoặc tay)
+- [ ] Set `approved: true` cho variation đã review OK (script bulk hoặc edit meta)
+- [ ] Set `frozen: true` cho approved (script bulk)
 - [ ] Commit `wireframe-library/feature-section/` + `library.json`
-- [ ] CHANGELOG v1.1.0-alpha
+
+### Per-batch quality criteria
+- Layout HTML render in browser **giống** JPG nguồn (so sánh side-by-side)
+- Validate pass: `<section>`, pxpace.css classes only, slot keys ∈ schema, required slots present
+- Slot debug toggle work (`<body class="slot-debug">`)
+- Mọi variation có meta.json đúng format
 
 ### Done khi
-- `wireframe-library/feature-section/` có ≥ 89 variation approved + frozen
-- Commit clean, repo size acceptable
+- 111/111 variation generated + validated
+- ≥ 89/111 (80%) approved + frozen
+- `library.json` catalog có sẵn
+- Commit `wireframe-library/feature-section/` (~5-10MB HTML + meta)
 
 ---
 
-## Phase 15 — Section Type Expansion (lặp lại theo nhu cầu)
+## Phase 14 — Optional Preview Gallery (`/wireframes` static viewer)
+
+**Goal:** UI nhẹ trong app để Phú browse library + iframe preview, NOT required cho release.
+
+### Tasks
+- [ ] `app/wireframes/page.tsx` — list type tabs + grid card variation
+- [ ] Card: thumbnail (JPG nguồn) + iframe preview HTML + meta info
+- [ ] Filter: tags, layout, approved status
+- [ ] Slot debug toggle (toggle `<body class="slot-debug">` trên iframe)
+- [ ] Click card → mở variation in fullscreen iframe
+- [ ] Read-only — không có generate/approve UI (làm tay qua Claude Code session)
+
+### Done khi
+- `/wireframes` mở được, browse 111 variation
+- Iframe preview render đúng
+- Filter/search hoạt động
+
+---
+
+## Phase 15 — Section Type Expansion (theo nhu cầu)
 
 > Không khẩn cấp cho release v1.0. Phase 16-18 chỉ cần Feature Section là demo được.
 
-Lặp Phase 12-14 cho mỗi type mới. Mỗi type 1 commit độc lập, bump library version.
+Lặp Phase 13 cho mỗi type mới:
+1. Phú thêm JPG vào `wireframe-design/<type>/`
+2. Define slot schema cho type trong `src/lib/wireframes/slot-schema.ts`
+3. Yêu cầu Claude Code generate batch
+4. Validate + approve + commit
 
 Priority: Hero → Header → Footer → CTA → FAQ → Testimonials → Logo Cloud → Pricing → Blog → Stats → Team → Contact.
 
@@ -602,9 +730,9 @@ Split thành 3 sub-phase theo Approach A đã chốt.
 | Phase | Version | Mục đích |
 |---|---|---|
 | 11 | (no bump) | foundation, no user-visible |
-| 12 | (no bump) | CLI internal |
-| 13 | (no bump) | dev UI internal |
-| 14 | library 1.0.0 (feature-section) | first library release, commit lib |
+| 12 | (deprecated) | code committed nhưng không dùng |
+| 13 | library 1.0.0 (feature-section) | first library release, commit lib |
+| 14 | (no bump) | optional preview gallery |
 | 15 | library MINOR bump per type | mở rộng |
 | 16 | 1.0.0-beta.1 | compose backend |
 | 17 | 1.0.0-rc.1 | Step 4 UI tích hợp |

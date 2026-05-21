@@ -1,0 +1,28 @@
+{
+  "id": "feature-section-020",
+  "type": "feature-section",
+  "variation": 20,
+  "sourceImage": "wireframe-design/feature-section/featuresection20.jpg",
+  "htmlPath": "wireframe-library/feature-section/020/index.html",
+  "layout": "stacked-header-badge-cloud",
+  "tags": ["minimal", "text-focus", "badge-chips", "left-aligned", "stacked"],
+  "slots": [
+    { "key": "eyebrow", "type": "text", "required": false, "description": "Short ALL-CAPS tagline above headline" },
+    { "key": "headline", "type": "text", "required": true, "description": "Main heading" },
+    { "key": "description", "type": "text", "required": false, "description": "Body paragraph below headline" },
+    { "key": "feature-1-title", "type": "text", "required": false, "description": "Chip label 1", "repeatGroup": "feature", "repeatIndex": 1 },
+    { "key": "feature-2-title", "type": "text", "required": false, "description": "Chip label 2", "repeatGroup": "feature", "repeatIndex": 2 },
+    { "key": "feature-3-title", "type": "text", "required": false, "description": "Chip label 3", "repeatGroup": "feature", "repeatIndex": 3 },
+    { "key": "feature-4-title", "type": "text", "required": false, "description": "Chip label 4", "repeatGroup": "feature", "repeatIndex": 4 },
+    { "key": "feature-5-title", "type": "text", "required": false, "description": "Chip label 5", "repeatGroup": "feature", "repeatIndex": 5 },
+    { "key": "feature-6-title", "type": "text", "required": false, "description": "Chip label 6", "repeatGroup": "feature", "repeatIndex": 6 },
+    { "key": "feature-7-title", "type": "text", "required": false, "description": "Chip label 7", "repeatGroup": "feature", "repeatIndex": 7 },
+    { "key": "feature-8-title", "type": "text", "required": false, "description": "Chip label 8", "repeatGroup": "feature", "repeatIndex": 8 },
+    { "key": "feature-9-title", "type": "text", "required": false, "description": "Chip label 9", "repeatGroup": "feature", "repeatIndex": 9 }
+  ],
+  "approved": false,
+  "frozen": false,
+  "libraryVersion": "1.0.0",
+  "generatedAt": "2026-05-21T00:00:00.000Z",
+  "generatedBy": "claude-opus-4-7"
+}

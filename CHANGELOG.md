@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+### Added — v1.0 Wireframe Component System
+- `wireframe-library/_shared/wireframe-components.css` — design system with `wf-*` classes: section/container, typography (eyebrow, h1-h5, description), buttons (primary/secondary/ghost/sizes), image/icon placeholders, cards, feature-grid, badge-list, stat, testimonial, faq, logo-cloud, checklist, form, layout helpers (stack/cluster/split/header-block)
+- `wireframe-library/AI-GENERATION-RULES.md` — canonical rule sheet for AI sessions to follow when generating variations: component catalog, slot conventions, 7-step decision flow, DO/DON'T, extension policy
+- `wireframe-library/feature-section/020/` — pilot variation refactored to use `wf-*` components (reference for future variations)
+
+### Changed
+- `src/lib/wireframes/html-validate.ts` — validator now loads class names from all 3 shared CSS files (pxpace + components + base), supporting BEM-style classes like `wf-foo--mod` and `wf-foo__bar`
+- `version-1.md` Quick Start — points AI sessions to `AI-GENERATION-RULES.md` as primary reference
+- Variation `index.html` wrapper now links `wireframe-components.css` between `pxpace.css` and `wireframe-base.css`
+
 ### Added — v1.0 Phase 12 Vision Pipeline
 - `prompts/06-wireframe-from-image.md` — AI Vision prompt: slot schema + token cheatsheet + JSON output format
 - `src/lib/ai/vision.ts` — multimodal wrapper: JPG→base64, prompt build, JSON parse, retry context, debug log

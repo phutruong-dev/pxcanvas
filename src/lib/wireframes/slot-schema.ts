@@ -60,7 +60,7 @@ export const SLOT_SCHEMAS: Record<SectionType, WireframeSlot[]> = {
     COMMON_SLOTS.ctaSecondary,
     // Repeat group "feature" — variations may have 2/3/4/6 items.
     // Slot schema declares the MAX. Specific variations declare which N apply via meta.json slots[].
-    ...flattenFeatureGroup(6),
+    ...flattenFeatureGroup(12),
     { key: "image-1", type: "image", required: false, description: "Hero/feature image (16:9 placeholder)" },
     { key: "image-2", type: "image", required: false, description: "Second feature image (optional)" },
   ],
