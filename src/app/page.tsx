@@ -1,17 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useRef, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import TopBar from "@/components/home/top-bar"
 import ProjectCard from "@/components/home/project-card"
 import EmptyState from "@/components/home/empty-state"
 import NewProjectModal from "@/components/home/new-project-modal"
 import { useProjectsStore } from "@/lib/store/projects"
+import { useWorkflowStore } from "@/lib/store/workflow"
+import type { SitemapNode } from "@/lib/types/sitemap"
+import type { BrandVoice } from "@/lib/types/brand-voice"
+import type { PageContent } from "@/lib/types/content"
 
 export default function HomePage() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [newOpen, setNewOpen] = useState(false)
   const projects = useProjectsStore((s) => s.projects)
+  const addProject = useProjectsStore((s) => s.addProject)
+  const setSitemap = useWorkflowStore((s) => s.setSitemap)
+  const setBrandVoice = useWorkflowStore((s) => s.setBrandVoice)
+  const setPageContent = useWorkflowStore((s) => s.setPageContent)
+  const loadProject = useWorkflowStore((s) => s.loadProject)
+  const importRef = useRef<HTMLInputElement | null>(null)
 
   // Avoid Zustand/localStorage hydration mismatch
   useEffect(() => {
@@ -31,6 +43,33 @@ export default function HomePage() {
     }
   }, [mounted])
 
+  async function handleImport(file: File) {
+    const formData = new FormData()
+    formData.append("file", file)
+    try {
+      const res = await fetch("/api/files/import-zip", { method: "POST", body: formData })
+      const json = await res.json()
+      if (!res.ok || json.error) throw new Error(json.error ?? "Import failed")
+      const { projectName, sitemap, brandVoice, pageContents } = json.data as {
+        projectName: string
+        sitemap: SitemapNode
+        brandVoice: BrandVoice | null
+        pageContents: Record<string, PageContent>
+      }
+      const project = addProject(projectName)
+      loadProject(project.id)
+      setSitemap(sitemap)
+      if (brandVoice) setBrandVoice(brandVoice)
+      Object.entries(pageContents).forEach(([pageId, content]) =>
+        setPageContent(pageId, content),
+      )
+      toast.success(`Imported "${projectName}"`)
+      router.push(`/project/${project.id}/step-4`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed")
+    }
+  }
+
   if (!mounted) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -45,7 +84,21 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <TopBar onNew={() => setNewOpen(true)} />
+      <TopBar
+        onNew={() => setNewOpen(true)}
+        onImport={() => importRef.current?.click()}
+      />
+      <input
+        ref={importRef}
+        type="file"
+        accept=".zip"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) void handleImport(f)
+          e.target.value = ""
+        }}
+      />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
         {sorted.length === 0 ? (

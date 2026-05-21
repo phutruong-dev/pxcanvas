@@ -26,12 +26,10 @@ export default function Step1Page() {
   const toggleImprovement = useWorkflowStore((s) => s.toggleImprovement)
   const setFormInput = useWorkflowStore((s) => s.setFormInput)
 
-  const settings = useSettingsStore((s) => ({
-    provider: s.provider,
-    apiKey: s.apiKey,
-    aiModel: s.aiModel,
-    debugLogging: s.debugLogging,
-  }))
+  const provider = useSettingsStore((s) => s.provider)
+  const apiKey = useSettingsStore((s) => s.apiKey)
+  const aiModel = useSettingsStore((s) => s.aiModel)
+  const debugLogging = useSettingsStore((s) => s.debugLogging)
 
   async function handleAnalyze(url: string, formInput: FormInput) {
     setLastUrl(url)
@@ -44,7 +42,11 @@ export default function Step1Page() {
       const res = await fetch("/api/ai/ux-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, formInput, settings }),
+        body: JSON.stringify({
+          url,
+          formInput,
+          settings: { provider, apiKey, aiModel, debugLogging },
+        }),
       })
       const json = await res.json()
       if (!res.ok || json.error) throw new Error(json.error ?? "Unexpected error")

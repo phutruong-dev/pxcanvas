@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { callAI } from "@/lib/ai/provider"
 import { extractJSON } from "@/lib/utils/extract-json"
+import { fetchUrlContent, formatFetchedPageForPrompt } from "@/lib/utils/url-fetcher"
 import type { UxImprovement, FormInput } from "@/lib/types/ux-analysis"
 import type { Settings } from "@/lib/types/settings"
 
@@ -15,9 +16,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = (await req.json()) as RequestBody
     const { url, formInput, settings } = body
 
-    const navStructure = url
-      ? `Reference URL: ${url}\n(Read this URL and extract its navigation structure and content overview.)`
-      : "No reference URL provided."
+    let navStructure = "No reference URL provided."
+    if (url && url.trim()) {
+      try {
+        const page = await fetchUrlContent(url.trim())
+        navStructure = formatFetchedPageForPrompt(page)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        navStructure = `Reference URL provided (${url}) but fetch failed: ${msg}. Proceed using project description only.`
+      }
+    }
 
     const raw = await callAI(
       "01-ux-analysis",

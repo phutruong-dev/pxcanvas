@@ -4,6 +4,8 @@ You are a brand strategist. Extract the brand voice from the provided input (web
 
 ## Input
 
+The input below may include any combination of: a pre-fetched website content block, an uploaded document, and a free-text brand description. Use whatever signal is available.
+
 {{brand_input}}
 
 ## Task

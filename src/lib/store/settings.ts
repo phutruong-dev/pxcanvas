@@ -8,6 +8,7 @@ type SettingsStore = Settings & {
   setOutputFolder: (path: string) => void
   setAiModel: (model: string) => void
   setDebugLogging: (enabled: boolean) => void
+  setDismissedFirstRun: (v: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -19,6 +20,7 @@ export const useSettingsStore = create<SettingsStore>()(
       setOutputFolder: (outputFolder) => set({ outputFolder }),
       setAiModel: (aiModel) => set({ aiModel }),
       setDebugLogging: (debugLogging) => set({ debugLogging }),
+      setDismissedFirstRun: (dismissedFirstRun) => set({ dismissedFirstRun }),
     }),
     { name: "pxcanvas:settings" }
   )

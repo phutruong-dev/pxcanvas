@@ -1,6 +1,7 @@
 export type Section = {
   id: string
-  name: string  // e.g. "Hero", "Social Proof", "FAQ — Short"
+  name: string         // e.g. "Hero", "Social Proof", "FAQ — Short"
+  description: string  // 1-2 sentences: what this section communicates + why it's on this page
 }
 
 export type PageContentStatus = "idle" | "generating" | "done" | "error"

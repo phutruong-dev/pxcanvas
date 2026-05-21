@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams, usePathname } from "next/navigation"
 import { useWorkflowStore } from "@/lib/store/workflow"
 import { useProjectsStore } from "@/lib/store/projects"
@@ -20,6 +20,12 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
   const loadProject = useWorkflowStore((s) => s.loadProject)
   const project = useProjectsStore((s) => s.getProject(id))
   const updateProjectStep = useProjectsStore((s) => s.updateProjectStep)
+  const [hydrated, setHydrated] = useState(false)
+
+  // Wait for Zustand persist to rehydrate before reading project from store
+  useEffect(() => {
+    setHydrated(true)
+  }, [])
 
   useEffect(() => {
     if (id) loadProject(id)
@@ -28,6 +34,14 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (id) updateProjectStep(id, stepFromPath(pathname))
   }, [id, pathname, updateProjectStep])
+
+  if (!hydrated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    )
+  }
 
   if (!project) {
     return (

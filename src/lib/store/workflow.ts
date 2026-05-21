@@ -1,9 +1,10 @@
 import { create } from "zustand"
-import { debounce } from "@/lib/utils/debounce"
 import type { SitemapNode } from "@/lib/types/sitemap"
 import type { BrandVoice } from "@/lib/types/brand-voice"
 import type { PageContent } from "@/lib/types/content"
 import type { UxImprovement, FormInput } from "@/lib/types/ux-analysis"
+
+export type SavingStatus = "idle" | "pending" | "saved"
 
 type WorkflowState = {
   projectId: string | null
@@ -12,6 +13,7 @@ type WorkflowState = {
   sitemap: SitemapNode | null       // root node
   brandVoice: BrandVoice | null
   pageContents: Record<string, PageContent>  // keyed by SitemapNode.id
+  savingStatus: SavingStatus
 }
 
 type WorkflowStore = WorkflowState & {
@@ -25,6 +27,7 @@ type WorkflowStore = WorkflowState & {
   addChildNode: (parentId: string) => SitemapNode
   deleteNode: (id: string) => void
   reparentNode: (nodeId: string, newParentId: string) => boolean
+  reorderSibling: (nodeId: string, direction: "up" | "down") => void
   setBrandVoice: (bv: BrandVoice) => void
   setPageContent: (pageId: string, content: PageContent) => void
 }
@@ -36,20 +39,12 @@ const EMPTY_STATE: WorkflowState = {
   sitemap: null,
   brandVoice: null,
   pageContents: {},
+  savingStatus: "idle",
 }
 
 function storageKey(projectId: string) {
   return `pxcanvas:workflow:${projectId}`
 }
-
-// Save debounced to localStorage — not Zustand persist (key is dynamic per project)
-const debouncedSave = debounce((projectId: string, state: WorkflowState) => {
-  try {
-    localStorage.setItem(storageKey(projectId), JSON.stringify(state))
-  } catch {
-    // quota exceeded handled via toast in components
-  }
-}, 1000)
 
 // Tree helpers
 function findNode(root: SitemapNode, id: string): SitemapNode | null {
@@ -88,10 +83,33 @@ function addChildToNode(root: SitemapNode, parentId: string, child: SitemapNode)
   return { ...root, children: root.children.map((c) => addChildToNode(c, parentId, child)) }
 }
 
+function findParent(root: SitemapNode, childId: string): SitemapNode | null {
+  for (const child of root.children) {
+    if (child.id === childId) return root
+    const found = findParent(child, childId)
+    if (found) return found
+  }
+  return null
+}
+
 export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
-  function save(patch: Partial<WorkflowState> = {}) {
-    const next = { ...get(), ...patch }
-    if (next.projectId) debouncedSave(next.projectId, next)
+  let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+  function save() {
+    const projectId = get().projectId
+    if (!projectId) return
+    set({ savingStatus: "pending" })
+    if (saveTimer) clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => {
+      try {
+        const { savingStatus: _omit, ...persisted } = get()
+        void _omit
+        localStorage.setItem(storageKey(projectId), JSON.stringify(persisted))
+        set({ savingStatus: "saved" })
+      } catch {
+        // quota exceeded — best effort; leave status as pending
+      }
+    }, 1000)
   }
 
   return {
@@ -101,8 +119,8 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
       const raw = localStorage.getItem(storageKey(projectId))
       if (raw) {
         try {
-          const saved = JSON.parse(raw) as WorkflowState
-          set({ ...saved, projectId })
+          const saved = JSON.parse(raw) as Partial<WorkflowState>
+          set({ ...EMPTY_STATE, ...saved, projectId, savingStatus: "saved" })
           return
         } catch {
           // corrupt data — start fresh
@@ -115,12 +133,12 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
 
     setFormInput: (formInput) => {
       set({ formInput })
-      save({ formInput })
+      save()
     },
 
     setUxImprovements: (uxImprovements) => {
       set({ uxImprovements })
-      save({ uxImprovements })
+      save()
     },
 
     toggleImprovement: (id) => {
@@ -128,12 +146,12 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
         i.id === id ? { ...i, checked: !i.checked } : i
       )
       set({ uxImprovements: items })
-      save({ uxImprovements: items })
+      save()
     },
 
     setSitemap: (sitemap) => {
       set({ sitemap })
-      save({ sitemap })
+      save()
     },
 
     updateNode: (id, patch) => {
@@ -141,7 +159,7 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
       if (!sitemap) return
       const updated = updateNodeInTree(sitemap, id, patch)
       set({ sitemap: updated })
-      save({ sitemap: updated })
+      save()
     },
 
     addChildNode: (parentId) => {
@@ -157,7 +175,7 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
       if (!sitemap) return child
       const updated = addChildToNode(sitemap, parentId, child)
       set({ sitemap: updated })
-      save({ sitemap: updated })
+      save()
       return child
     },
 
@@ -166,7 +184,7 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
       if (!sitemap || sitemap.id === id) return
       const updated = removeNodeFromTree(sitemap, id)
       set({ sitemap: updated })
-      save({ sitemap: updated })
+      save()
     },
 
     // Returns false if would create a cycle (dragging into own descendant)
@@ -174,27 +192,47 @@ export const useWorkflowStore = create<WorkflowStore>()((set, get) => {
       const { sitemap } = get()
       if (!sitemap) return false
       if (nodeId === newParentId) return false
+      if (sitemap.id === nodeId) return false  // never reparent the root
       // Block if newParentId is a descendant of nodeId
       if (isDescendant(sitemap, nodeId, newParentId)) return false
       const node = findNode(sitemap, nodeId)
       if (!node) return false
+      // No-op if already a direct child of newParentId
+      const currentParent = findParent(sitemap, nodeId)
+      if (currentParent && currentParent.id === newParentId) return false
       const withoutNode = removeNodeFromTree(sitemap, nodeId)
       const updatedNode = { ...node, parentId: newParentId }
       const updated = addChildToNode(withoutNode, newParentId, updatedNode)
       set({ sitemap: updated })
-      save({ sitemap: updated })
+      save()
       return true
+    },
+
+    reorderSibling: (nodeId, direction) => {
+      const { sitemap } = get()
+      if (!sitemap) return
+      const parent = findParent(sitemap, nodeId)
+      if (!parent) return
+      const idx = parent.children.findIndex((c) => c.id === nodeId)
+      const newIdx = direction === "up" ? idx - 1 : idx + 1
+      if (newIdx < 0 || newIdx >= parent.children.length) return
+      const reordered = [...parent.children]
+      const [moved] = reordered.splice(idx, 1)
+      reordered.splice(newIdx, 0, moved)
+      const updated = updateNodeInTree(sitemap, parent.id, { children: reordered })
+      set({ sitemap: updated })
+      save()
     },
 
     setBrandVoice: (brandVoice) => {
       set({ brandVoice })
-      save({ brandVoice })
+      save()
     },
 
     setPageContent: (pageId, content) => {
       const pageContents = { ...get().pageContents, [pageId]: content }
       set({ pageContents })
-      save({ pageContents })
+      save()
     },
   }
 })

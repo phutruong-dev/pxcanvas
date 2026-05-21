@@ -82,11 +82,11 @@ web-content-app/
 | 3 | ✅ | State Management & Persistence | — |
 | 4 | ✅ | AI Provider Abstraction & Prompts | US-013, US-015 (backend) |
 | 5 | ✅ | Home & Project Lifecycle | S-00, S-01 · US-006/7/8/9 |
-| 6 | ⬜ | Step 1 — Input & UX Analysis | S-02 · US-001 |
-| 7 | ⬜ | Step 2 — Sitemap Canvas | S-03 · US-002/3/10 |
-| 8 | ⬜ | Step 3 — Brand Voice | S-04 · US-004 |
-| 9 | ⬜ | Step 4 — Generate Content + Zip | S-05 · US-005/11/12 |
-| 10 | ⬜ | Settings UI + Polish | S-06 · US-013/14/15 (UI) |
+| 6 | ✅ | Step 1 — Input & UX Analysis | S-02 · US-001 |
+| 7 | ✅ | Step 2 — Sitemap Canvas | S-03 · US-002/3/10 |
+| 8 | ✅ | Step 3 — Brand Voice | S-04 · US-004 |
+| 9 | ✅ | Step 4 — Generate Content + Zip | S-05 · US-005/11/12 |
+| 10 | ✅ | Settings UI + Polish | S-06 · US-013/14/15 (UI) |
 
 **Legend:** ⬜ chưa làm · 🚧 đang làm · ✅ xong · ⏸️ tạm hoãn
 
@@ -169,7 +169,7 @@ web-content-app/
 - [x] `src/lib/store/settings.ts` — provider mode, API key, output folder, model, debug logging
 - [x] `src/lib/store/undo-redo.ts` — stack max 20, push/undo/redo + deep clone
 - [x] `src/lib/utils/debounce.ts`
-- [ ] Handler localStorage quota exceeded → toast (implement in Phase 5 khi có Sonner setup)
+- [x] Handler localStorage quota exceeded → toast (implemented in `src/app/page.tsx` "Storage is almost full" warning at >4.5MB)
 - [x] `docs/state-management.md` — viết ở Phase 1
 
 ### Done khi
@@ -203,18 +203,18 @@ web-content-app/
 
 ---
 
-## Phase 5 — Home & Project Lifecycle (S-00, S-01)
+## Phase 5 — Home & Project Lifecycle (S-00, S-01) ✅
 
 **Covers:** US-006, US-007, US-008, US-009.
 
 ### Tasks
-- [ ] `app/page.tsx` — render project grid + empty state
-- [ ] `components/home/project-card.tsx` — card + 3-dot menu (Rename inline / Duplicate / Delete)
-- [ ] `components/home/new-project-modal.tsx` — modal nhập tên + auto-suffix `(2)`
-- [ ] `components/home/empty-state.tsx`
-- [ ] `components/ui/delete-confirm-modal.tsx` — reusable (Phase 7 dùng lại)
-- [ ] Top bar: logo + "New Project" + Import (Phase 9 wire) + Settings icon
-- [ ] Click card → router push `/project/[id]/step-{currentStep}`
+- [x] `app/page.tsx` — render project grid + empty state + localStorage quota warning
+- [x] `components/home/project-card.tsx` — card + 3-dot menu (Rename inline / Duplicate / Delete)
+- [x] `components/home/new-project-modal.tsx` — modal nhập tên + auto-suffix `(2)`
+- [x] `components/home/empty-state.tsx`
+- [x] `components/ui/delete-confirm-modal.tsx` — reusable (Phase 7 dùng lại)
+- [x] Top bar: logo + "New Project" + Import (wired Phase 9) + Settings icon
+- [x] Click card → router push `/project/[id]/step-{currentStep}`
 
 ### Done khi
 - CRUD project hoạt động, persist localStorage
@@ -222,18 +222,18 @@ web-content-app/
 
 ---
 
-## Phase 6 — Workflow Step 1: Input & UX Analysis (S-02)
+## Phase 6 — Workflow Step 1: Input & UX Analysis (S-02) ✅
 
 **Covers:** US-001.
 
 ### Tasks
-- [ ] `app/project/[id]/layout.tsx` — workflow shell: step indicator (1/4..4/4), breadcrumb, settings button
-- [ ] `app/project/[id]/step-1/page.tsx`
-- [ ] `components/step-1/input-form.tsx` — URL + site type + 3 textareas + tone chips + validation
-- [ ] `components/step-1/ux-improvements-list.tsx` — checkbox items, loading, error/retry, skip
-- [ ] API route `/api/ai/ux-analysis` — gọi prompt-loader key `01-ux-analysis`, return `UxImprovement[]`
-- [ ] Edge cases: URL fail vẫn chạy, AI 0 improvements → message, AI fail → retry/skip
-- [ ] Save state → workflow store, "Continue" → step-2
+- [x] `app/project/[id]/layout.tsx` — workflow shell: StepIndicator (1/4..4/4), breadcrumb, settings button
+- [x] `app/project/[id]/step-1/page.tsx` — 3-stage flow (input → analyzing → results)
+- [x] `components/step-1/input-form.tsx` — URL + site type + 3 textareas + tone chips + validation
+- [x] `components/step-1/ux-improvements-list.tsx` — checkbox items, loading, error/retry, skip
+- [x] API route `/api/ai/ux-analysis` — gọi prompt-loader key `01-ux-analysis`, return `UxImprovement[]`
+- [x] Edge cases: URL fail vẫn chạy, AI 0 improvements → message, AI fail → retry/skip
+- [x] Save state → workflow store, "Continue" → step-2
 
 ### Done khi
 - End-to-end: input → AI → tick → Continue lưu state
@@ -241,22 +241,22 @@ web-content-app/
 
 ---
 
-## Phase 7 — Workflow Step 2: Sitemap Canvas (S-03) — PHASE NẶNG NHẤT
+## Phase 7 — Workflow Step 2: Sitemap Canvas (S-03) ✅
 
 **Covers:** US-002, US-003, US-010.
 
 ### Tasks
-- [ ] `app/project/[id]/step-2/page.tsx`
-- [ ] API route `/api/ai/sitemap` — input form + improvements ticked, output tree JSON
-- [ ] `components/step-2/sitemap-canvas.tsx` — React Flow + custom node type
-- [ ] `components/step-2/node-card.tsx` — name + description + "+" + "improved" badge
-- [ ] `components/step-2/side-panel.tsx` — edit name/description/delete
-- [ ] `components/step-2/canvas-toolbar.tsx` — undo/redo, zoom, save indicator, node count
-- [ ] Node interactions: add child, double-click rename, delete (confirm nếu có children), drag reorder, drag re-parent (block descendant)
-- [ ] Wire undo/redo store, Ctrl+Z / Ctrl+Shift+Z
-- [ ] Auto-save debounced 1s
-- [ ] Loading overlay khi AI generate, retry button khi fail, "Regenerate" nếu < 3 pages
-- [ ] Export modal (M-02): JSON serialize tree / PNG (html-to-image)
+- [x] `app/project/[id]/step-2/page.tsx`
+- [x] API route `/api/ai/sitemap` — input form + improvements ticked, output tree JSON
+- [x] `components/step-2/sitemap-canvas.tsx` — React Flow + custom node type
+- [x] `components/step-2/node-card.tsx` — name + description + "+" + "improved" badge
+- [x] `components/step-2/side-panel.tsx` — edit name/description/delete + sibling reorder
+- [x] `components/step-2/canvas-toolbar.tsx` — undo/redo, zoom, save indicator, node count, regenerate chip
+- [x] Node interactions: add child (+), select, rename/description (side panel), delete (confirm if children), sibling reorder (↑↓), drag re-parent (block descendant)
+- [x] Wire undo/redo store via `useSitemapMutations`, Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y
+- [x] Auto-save debounced 1s + `savingStatus` field in workflow store
+- [x] Loading overlay khi AI generate, retry button khi fail, "Regenerate" chip khi < 3 pages
+- [x] Export modal (M-02): JSON serialize tree / PNG (html-to-image)
 
 ### Done khi
 - Generate sitemap → edit đủ 9 thao tác → undo/redo → reload giữ state → export JSON/PNG
@@ -264,17 +264,18 @@ web-content-app/
 
 ---
 
-## Phase 8 — Workflow Step 3: Brand Voice (S-04)
+## Phase 8 — Workflow Step 3: Brand Voice (S-04) ✅
 
 **Covers:** US-004.
 
 ### Tasks
-- [ ] `app/project/[id]/step-3/page.tsx`
-- [ ] API route `/api/ai/brand-voice` — input URL/file/text, output 5-field structured
-- [ ] `components/step-3/brand-voice-input.tsx` — URL + drag-drop upload (max 10MB, .md/.txt/.pdf) + textarea
-- [ ] `components/step-3/brand-voice-form.tsx` — editable 5 fields + regen + save
-- [ ] File parsing strategy decision → `docs/decisions/` (PDF parse client vs server vs pass-to-AI)
-- [ ] Validation: chưa save mà Continue → block + hint
+- [x] `app/project/[id]/step-3/page.tsx`
+- [x] API route `/api/ai/brand-voice` — input URL/file/text → 5-field structured
+- [x] `components/step-3/brand-voice-input.tsx` — URL + drag-drop upload (.md/.txt ≤10MB, PDF deferred) + textarea
+- [x] `components/step-3/brand-voice-form.tsx` — editable 5 fields + regen + save + validation
+- [x] `components/step-3/brand-voice-summary.tsx` — collapsed input summary post-save
+- [x] File parsing strategy → `docs/decisions/0001-pdf-parsing-deferred.md`
+- [x] Validation: dirty/unsaved → Continue blocked + hint; field-level toasts on Save
 
 ### Done khi
 - Generate brand voice → edit → save persist → Continue chỉ enable sau save
@@ -282,24 +283,24 @@ web-content-app/
 
 ---
 
-## Phase 9 — Workflow Step 4: Generate Content + Zip (S-05)
+## Phase 9 — Workflow Step 4: Generate Content + Zip (S-05) ✅
 
 **Covers:** US-005, US-011, US-012.
 
 ### Tasks
-- [ ] `app/project/[id]/step-4/page.tsx`
-- [ ] API `/api/ai/sections` — propose section list per page
-- [ ] API `/api/ai/content` — generate `.md` per page (node + sections + brand voice + format rules)
-- [ ] API `/api/files/write-content` — fs/promises ghi file, return path
-- [ ] API `/api/files/check-folder` — verify path tồn tại + writable
-- [ ] API `/api/files/export-zip` — sitemap.json + brand-voice.md + pages/*.md + meta.json
-- [ ] API `/api/files/import-zip` — parse zip → tạo project mới, validate format
-- [ ] `components/step-4/page-list.tsx` — sidebar list pages + status badge
-- [ ] `components/step-4/section-editor.tsx` — drag reorder, add/remove/rename
-- [ ] `components/step-4/content-preview.tsx` — markdown preview, copy, blacklist highlight, regen page/section
-- [ ] `components/step-4/batch-progress.tsx` — progress bar, cancel, failed retry list
-- [ ] Overwrite modal (M-03) — Overwrite/Skip/Rename
-- [ ] Import button trên Home wire vào API import-zip
+- [x] `app/project/[id]/step-4/page.tsx`
+- [x] API `/api/ai/sections` — propose section list per page
+- [x] API `/api/ai/content` — generate `.md` per page (node + sections + brand voice + format rules)
+- [x] API `/api/files/write-content` — fs/promises write file, return path + existed flag
+- [x] API `/api/files/check-folder` — verify path writable, mkdir if missing
+- [x] API `/api/files/export-zip` — meta.json + sitemap.json + brand-voice.json + brand-voice.md + pages/*.md
+- [x] API `/api/files/import-zip` — parse zip → validate meta → return project data
+- [x] `components/step-4/page-list.tsx` — sidebar list + status badge + depth indent + per-row retry
+- [x] `components/step-4/section-editor.tsx` — HTML5 drag reorder, add/remove, inline rename
+- [x] `components/step-4/content-preview.tsx` — pre markdown, blacklist highlight, copy, regen
+- [x] `components/step-4/batch-progress.tsx` — progress bar, cancel, failed list + retry failed
+- [x] `components/step-4/overwrite-modal.tsx` — M-03: Overwrite/Skip/Rename input
+- [x] Import button trên Home wired → /api/files/import-zip → create project + route to step-4
 
 ### Done khi
 - Generate All → file `.md` ra folder + preview + copy
@@ -308,26 +309,31 @@ web-content-app/
 
 ---
 
-## Phase 10 — Settings UI + Polish
+## Phase 10 — Settings UI + Polish ✅
 
 **Covers:** US-013, US-014, US-015 (UI), global polish.
 
 ### Tasks
-- [ ] `app/settings/page.tsx`
-- [ ] `components/settings/ai-provider.tsx` — toggle Mode A/B, masked API key, Test connection
-- [ ] `components/settings/output-folder.tsx` — path input, validate, browse picker
-- [ ] `components/settings/prompt-files.tsx` — list 5 files, status ✓/✗, restore default
-- [ ] First-run wizard (modal hướng dẫn nếu không detect provider)
-- [ ] Error boundaries — global + per workflow step
-- [ ] Toast system wire toàn app
-- [ ] Performance: canvas memo, selective Zustand subscribe, verify ≤ 50 nodes smooth
-- [ ] Accessibility quick pass — keyboard nav, focus rings, aria-label icon buttons
-- [ ] `docs/troubleshooting.md` — fill từ edge cases đã gặp
-- [ ] README hoàn thiện với screenshot
+- [x] `app/settings/page.tsx` — 3 section cards (Provider / Output / Prompts)
+- [x] `components/settings/ai-provider.tsx` — Mode A/B toggle, masked key + eye toggle, model select, debug logging, sdkDetected badge, Test connection với ephemeral badge
+- [x] `components/settings/output-folder.tsx` — path input + onBlur check (`noCreate:true`) + "Ensure folder" button (mkdir). Skip browse picker (File System Access không cho server-side path)
+- [x] `components/settings/prompt-files.tsx` — 5 rows với ✓/✗ + "Restore default" per file + "Restore all"
+- [x] First-run wizard (`components/first-run/{wizard,first-run-gate}.tsx`) — Dialog modal trong root layout, gate qua client
+- [x] Error boundaries — `app/error.tsx`, `app/global-error.tsx`, `app/project/[id]/error.tsx`
+- [x] Toast system — Toaster đã mounted ở `layout.tsx`, đã dùng xuyên suốt step pages
+- [x] Performance: NodeCard đã memo từ Phase 7, selectors là single-field (không cần refactor)
+- [x] Accessibility — tất cả icon-only `<Button size="icon">` đã có `aria-label`
+- [x] `docs/troubleshooting.md` — expanded với edge cases Phase 5-9
+- [x] README cập nhật MVP 1.0.0 status + scripts table + workflow + folder structure
+
+### API extensions
+- [x] `ensure-defaults` route — thêm `{force, key}` payload
+- [x] `check-folder` route — thêm `noCreate` flag
+- [x] `health` route — keys không có `.md` suffix
 
 ### Done khi
-- Settings 100%
-- Pilot project (Villa T redo) end-to-end < 2h theo PRD §⑧
+- [x] Settings 100%
+- [ ] Pilot project (Villa T redo) end-to-end < 2h theo PRD §⑧ — *cần user smoke-test thực tế*
 
 ---
 
@@ -350,11 +356,11 @@ web-content-app/
 
 ---
 
-## ❓ Câu hỏi cần chốt trước khi bắt đầu Phase 1
+## ❓ Câu hỏi cần chốt trước khi bắt đầu Phase 1 ✅ (đã resolved trong implementation)
 
-- [ ] AI model default cho Mode A/B: **Sonnet 4.6** hay **Opus 4.7**? (suggest: Sonnet 4.6 — đủ tốt, rẻ hơn, đúng PRD context)
-- [ ] Đề xuất [MVP] nào muốn drop khỏi MVP để gọn?
-- [ ] Bắt đầu Phase 1 luôn hay tách 1a (docs only — review trước) + 1b (code scaffold)?
+- [x] AI model default cho Mode A/B → **Sonnet 4.6** (`DEFAULT_SETTINGS.aiModel = "claude-sonnet-4-6"` trong `src/lib/types/settings.ts`)
+- [x] Đề xuất [MVP] nào drop → không drop, tất cả 8 [MVP] items đã include; 4 [Post-MVP] giữ post-MVP
+- [x] Bắt đầu Phase 1 luôn hay tách 1a/1b → làm 1 phase liền (docs + scaffold cùng commit)
 
 ---
 
@@ -366,9 +372,9 @@ web-content-app/
 | 2 | 0.2.0 | 2026-05-20 | Data Model |
 | 3 | 0.3.0 | 2026-05-20 | State |
 | 4 | 0.4.0 | 2026-05-20 | AI Provider |
-| 5 | 0.5.0 | — | Home |
-| 6 | 0.6.0 | — | Step 1 |
-| 7 | 0.7.0 | — | Step 2 Canvas |
-| 8 | 0.8.0 | — | Step 3 Brand Voice |
-| 9 | 0.9.0 | — | Step 4 Generate |
-| 10 | 1.0.0 | — | MVP |
+| 5 | 0.5.0 | 2026-05-20 | Home |
+| 6 | 0.6.0 | 2026-05-20 | Step 1 |
+| 7 | 0.7.0 | 2026-05-21 | Step 2 Canvas |
+| 8 | 0.8.0 | 2026-05-21 | Step 3 Brand Voice |
+| 9 | 0.9.0 | 2026-05-21 | Step 4 Generate |
+| 10 | 1.0.0 | 2026-05-21 | MVP |
