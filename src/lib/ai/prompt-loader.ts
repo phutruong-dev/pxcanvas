@@ -9,6 +9,7 @@ export type PromptKey =
   | "03-brand-voice-extract"
   | "04-sections-propose"
   | "05-content-generate"
+  | "06-wireframe-from-image"
 
 /**
  * Read a prompt file, replace {{placeholders}}, return the final prompt string.
@@ -45,6 +46,7 @@ export const PROMPT_KEYS: PromptKey[] = [
   "03-brand-voice-extract",
   "04-sections-propose",
   "05-content-generate",
+  "06-wireframe-from-image",
 ]
 
 export async function ensurePromptFile(key: PromptKey, force = false): Promise<void> {
@@ -291,6 +293,8 @@ Return ONLY valid JSON array, no markdown fences, no extra text. Each section:
 
 If the page is non-content (e.g. dashboard route, system page), return a minimal list with just Hero and Pre-footer CTA.
 `,
+
+  "06-wireframe-from-image": `# Wireframe HTML Generation Prompt\n\nSee prompts/06-wireframe-from-image.md — this file should not be auto-generated.\nDelete this file and restore from the repo.\n`,
 
   "05-content-generate": `# Content Generation Prompt
 

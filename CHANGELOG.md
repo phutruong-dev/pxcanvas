@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+### Added — v1.0 Phase 12 Vision Pipeline
+- `prompts/06-wireframe-from-image.md` — AI Vision prompt: slot schema + token cheatsheet + JSON output format
+- `src/lib/ai/vision.ts` — multimodal wrapper: JPG→base64, prompt build, JSON parse, retry context, debug log
+- `src/lib/wireframes/html-validate.ts` — pxpace.css class validator (parse CSS) + data-slot validator
+- `scripts/wireframe-generate.ts` — CLI for Track A: `--type` `--variation` `--all` `--skip-existing`; retry ×2 with error feedback; writes index.html + meta.json
+- `scripts/wireframe-validate.ts` — bulk library integrity checker
+
+### Changed — v1.0 Phase 12 Vision Pipeline
+- `src/lib/ai/anthropic-api.ts` — add `callAnthropicApiWithImage()` for multimodal (image+text) calls
+- `src/lib/ai/prompt-loader.ts` — add `"06-wireframe-from-image"` to `PromptKey` union + `PROMPT_KEYS` array
+- `package.json` — add scripts `wireframe:gen` and `wireframe:validate`
+
 ### Added — v1.0 Phase 11 Foundation
 - `version-1.md` — plan for v1.0 wireframe library (Approach A: wireframe-first strict)
 - `src/lib/types/wireframe.ts` — `SectionType` enum (14 types), `WireframeSlot`/`WireframeVariation`/`WireframeMeta`/`LibraryCatalog` types

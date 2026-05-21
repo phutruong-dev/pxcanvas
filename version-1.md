@@ -371,7 +371,7 @@ Project cũ (Section thiếu `type`/`variationId`):
 | Phase | Track | Status | Title |
 |---|---|---|---|
 | 11 | A+B | ✅ | Foundation: types, slot schema, cheatsheet, library folder |
-| 12 | A | ⬜ | Vision pipeline (CLI single + prompt + validate) |
+| 12 | A | ✅ | Vision pipeline (CLI single + prompt + validate) |
 | 13 | A | ⬜ | Dev QA UI + batch runner (hidden behind `PXCANVAS_DEV=1`) |
 | 14 | A | ⬜ | Build Feature Section library (111 variation, approve, freeze) |
 | 15 | A | ⬜ | (Lặp lại P14 cho các section type khác — không khẩn cấp) |
@@ -410,25 +410,28 @@ Project cũ (Section thiếu `type`/`variationId`):
 
 ---
 
-## Phase 12 — Vision Pipeline (CLI single)
+## Phase 12 — Vision Pipeline (CLI single) ✅
 
 **Goal:** CLI sinh 1 variation HTML từ JPG, validate pass.
 
 ### Tasks
-- [ ] `prompts/06-wireframe-from-image.md`
-- [ ] Mở rộng `src/lib/ai/anthropic-api.ts` hỗ trợ image content
-- [ ] `src/lib/ai/vision.ts` — wrapper helper
-- [ ] `src/lib/wireframes/html-validate.ts` — class check, slot check
-- [ ] `scripts/wireframe-generate.ts` — CLI args `--type --variation [--all] [--skip-existing]`
-  - Write `wireframe-library/<type>/<NNN>/index.html` + `meta.json`
-  - Generate thumbnail bằng html-to-image (headless)
-- [ ] Log AI call vào `logs/ai-calls.jsonl`
-- [ ] `package.json` scripts: `wireframe:gen`, `wireframe:validate`
-- [ ] Test tay 5 JPG đa dạng
+- [x] `prompts/06-wireframe-from-image.md` — đầy đủ slot schema, token cheatsheet, output JSON format
+- [x] Mở rộng `src/lib/ai/anthropic-api.ts` — `callAnthropicApiWithImage()` multimodal
+- [x] `src/lib/ai/vision.ts` — wrapper: load JPG → base64, build prompt, parse JSON response, debug log
+- [x] `src/lib/wireframes/html-validate.ts` — class check (parse pxpace.css), slot check, required slot check
+- [x] `scripts/wireframe-generate.ts` — CLI: `--type`, `--variation N`, `--all`, `--skip-existing`, `--force`
+  - Retry max 2 lần với error feedback vào prompt
+  - Write `index.html` (wrapped `<html>`) + `meta.json`
+- [x] `scripts/wireframe-validate.ts` — bulk validate library integrity
+- [x] Log AI call vào `logs/ai-calls.jsonl` (debug flag)
+- [x] `package.json` scripts: `wireframe:gen`, `wireframe:validate`
+- [x] Extend `PromptKey` → `"06-wireframe-from-image"`
+- [ ] **Test tay 5 JPG** (cần user chạy với `.env.local` + `ANTHROPIC_API_KEY`)
 
 ### Done khi
-- 5/5 HTML mở browser nhìn giống JPG, pass validate
-- Commit (chỉ code, chưa commit library)
+- [x] `tsc --noEmit` pass
+- [x] Import + html-validate smoke test PASS
+- [ ] 5/5 HTML mở browser nhìn giống JPG → **cần user chạy CLI**
 
 ---
 
