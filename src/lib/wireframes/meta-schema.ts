@@ -95,9 +95,10 @@ export function validateLibraryCatalog(input: unknown): ValidationResult<Library
   return { ok: true, data: o as unknown as LibraryCatalog }
 }
 
-// Helper: format variation id from type + number, zero-pad to 3 digits.
+// Helper: format variation id from type + number.
+// Convention: folder name = source JPG stem (e.g. "feature-section-20"), no zero-padding.
 export function formatVariationId(type: SectionType, variation: number): string {
-  return `${type}-${String(variation).padStart(3, "0")}`
+  return `${type}-${variation}`
 }
 
 export function parseVariationId(id: string): { type: SectionType; variation: number } | null {

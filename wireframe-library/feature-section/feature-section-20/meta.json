@@ -1,9 +1,9 @@
 {
-  "id": "feature-section-020",
+  "id": "feature-section-20",
   "type": "feature-section",
   "variation": 20,
-  "sourceImage": "wireframe-design/feature-section/featuresection20.jpg",
-  "htmlPath": "wireframe-library/feature-section/020/index.html",
+  "sourceImage": "wireframe-design/feature-section/feature-section-20.jpg",
+  "htmlPath": "wireframe-library/feature-section/feature-section-20/index.html",
   "layout": "stacked-header-badge-cloud",
   "tags": ["minimal", "text-focus", "badge-chips", "left-aligned", "stacked"],
   "slots": [

@@ -23,15 +23,26 @@ When you generate a variation, you're choosing **which** components + **how** to
 
 ## 2. File output per variation
 
-Every variation lives at `wireframe-library/<type>/<NNN>/`:
+**Naming convention (CRITICAL):** HTML folder name MUST equal source JPG filename stem.
 
 ```
-NNN/
+wireframe-design/feature-section/feature-section-20.jpg          ← source
+wireframe-library/feature-section/feature-section-20/index.html  ← output
+                                  └─────────┬─────────┘
+                                            └─ same stem
+```
+
+Every variation lives at `wireframe-library/<type>/<type>-<N>/`:
+
+```
+feature-section-<N>/
 ├── index.html      # Full HTML page (DOCTYPE → body, links to shared CSS)
 └── meta.json       # Structured metadata
 ```
 
-`NNN` is the variation number, **zero-padded to 3 digits**: `001`, `020`, `111`.
+- `<N>` is the exact number from the JPG filename — **no zero-padding** (e.g., `feature-section-1`, `feature-section-20`, `feature-section-111`)
+- Future section types follow the same pattern: `hero-5/`, `footer-12/`, etc.
+- The variation ID in `meta.json` = folder name (e.g., `"id": "feature-section-20"`)
 
 ### 2.1. index.html template (exact wrapper)
 
@@ -335,7 +346,7 @@ These have been reviewed and serve as canonical examples. When in doubt, open on
 
 | Variation | Layout | Why it's a good reference |
 |---|---|---|
-| `feature-section/020/` | `left-text-badge-cloud` | Header block + flex-wrap badge list |
+| `feature-section/feature-section-20/` | `stacked-header-badge-cloud` | Header block + flex-wrap badge list |
 
 (More to be added as Phase 13 progresses.)
 
@@ -368,12 +379,12 @@ User: "Generate feature-section variations 21-30"
   ↓
 For each N in [21..30]:
   ↓
-  Read wireframe-design/feature-section/featuresectionN.jpg
+  Read wireframe-design/feature-section/feature-section-<N>.jpg
   ↓
   Follow §5 Decision Flow (Steps 1-7)
   ↓
-  Write wireframe-library/feature-section/<NNN>/index.html
-  Write wireframe-library/feature-section/<NNN>/meta.json
+  Write wireframe-library/feature-section/feature-section-<N>/index.html
+  Write wireframe-library/feature-section/feature-section-<N>/meta.json
   ↓
 After batch:
   ↓

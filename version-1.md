@@ -22,12 +22,12 @@
 
 1. User yêu cầu generate batch variation N..M (ví dụ "generate 21-30").
 2. Với mỗi variation N trong batch (theo `AI-GENERATION-RULES.md §5 Decision Flow`):
-   - `Read` ảnh `wireframe-design/feature-section/featuresection<N>.jpg`
+   - `Read` ảnh `wireframe-design/feature-section/feature-section-<N>.jpg`
    - Analyze: identify section type → layout family → blocks → compose wf-* components
-   - `Write` `wireframe-library/feature-section/<NNN>/index.html` (NNN = zero-pad 3 digits)
-   - `Write` `wireframe-library/feature-section/<NNN>/meta.json`
+   - `Write` `wireframe-library/feature-section/feature-section-<N>/index.html` (**folder name = JPG stem, KHÔNG zero-pad**)
+   - `Write` `wireframe-library/feature-section/feature-section-<N>/meta.json`
 3. Sau batch: `npm run wireframe:validate` → confirm pass
-4. User mở browser xem từng `index.html` so với JPG
+4. User mở browser xem từng `index.html` so với JPG (cross-reference dễ vì cùng stem name)
 
 ### Files quan trọng (đọc trước generate)
 

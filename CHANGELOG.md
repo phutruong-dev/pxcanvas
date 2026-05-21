@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+### Added — v1.0 Wireframe Library variation 2
+- `wireframe-library/feature-section/feature-section-2/` — centered header + 3-col bordered card grid with 6 feature items (icon + title + body)
+
+### Changed — v1.0 Wireframe naming convention
+- Renamed 111 source JPGs: `featuresection<N>.jpg` → `feature-section-<N>.jpg` (one-time, via `git mv` preserving history)
+- Renamed pilot variation folder: `wireframe-library/feature-section/020/` → `feature-section-20/`
+- HTML folder name now **exactly matches** source JPG filename stem — eliminates QA cross-reference friction
+- `src/lib/wireframes/meta-schema.ts` — `formatVariationId()` no longer zero-pads (returns `feature-section-2`, not `feature-section-002`)
+- `scripts/wireframe-validate.ts` — folder regex now `^<type>-\d+$` (matches new convention)
+- `wireframe-library/AI-GENERATION-RULES.md` — naming convention section made explicit
+- `version-1.md` Quick Start — paths updated to new convention
+
 ### Added — v1.0 Wireframe Component System
 - `wireframe-library/_shared/wireframe-components.css` — design system with `wf-*` classes: section/container, typography (eyebrow, h1-h5, description), buttons (primary/secondary/ghost/sizes), image/icon placeholders, cards, feature-grid, badge-list, stat, testimonial, faq, logo-cloud, checklist, form, layout helpers (stack/cluster/split/header-block)
 - `wireframe-library/AI-GENERATION-RULES.md` — canonical rule sheet for AI sessions to follow when generating variations: component catalog, slot conventions, 7-step decision flow, DO/DON'T, extension policy

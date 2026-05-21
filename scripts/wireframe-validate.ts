@@ -31,7 +31,15 @@ async function main() {
       continue // type not built yet
     }
 
-    const variationDirs = entries.filter((e) => /^\d{3}$/.test(e)).sort()
+    // Folder name = source JPG stem (e.g. "feature-section-20")
+    const folderPattern = new RegExp(`^${type}-(\\d+)$`)
+    const variationDirs = entries
+      .filter((e) => folderPattern.test(e))
+      .sort((a, b) => {
+        const na = parseInt(a.match(folderPattern)![1], 10)
+        const nb = parseInt(b.match(folderPattern)![1], 10)
+        return na - nb
+      })
     if (variationDirs.length === 0) continue
 
     console.log(`\n── ${type} (${variationDirs.length} variations)`)
@@ -40,7 +48,7 @@ async function main() {
       const fullDir = path.join(typeDir, dir)
       const htmlFile = path.join(fullDir, "index.html")
       const metaFile = path.join(fullDir, "meta.json")
-      const variation = parseInt(dir, 10)
+      const variation = parseInt(dir.match(folderPattern)![1], 10)
       const errors: string[] = []
       const warnings: string[] = []
 
