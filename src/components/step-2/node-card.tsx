@@ -1,8 +1,8 @@
 "use client"
 
-import { memo } from "react"
+import { memo, useState } from "react"
 import { Handle, Position, type NodeProps } from "reactflow"
-import { Plus } from "lucide-react"
+import { GripVertical, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useWorkflowStore } from "@/lib/store/workflow"
@@ -20,13 +20,49 @@ function findInTree(root: SitemapNode, id: string): SitemapNode | null {
 
 function NodeCardImpl({ id }: NodeProps) {
   const node = useWorkflowStore((s) => (s.sitemap ? findInTree(s.sitemap, id) : null))
-  const sectionCount = useWorkflowStore((s) => s.pageContents[id]?.sections?.length ?? 0)
+  const sections = useWorkflowStore((s) => s.pageContents[id]?.sections ?? [])
+  const pageContents = useWorkflowStore((s) => s.pageContents)
+  const setPageContent = useWorkflowStore((s) => s.setPageContent)
   const { selectedId, hoverTargetId, onAddChild } = useCanvasContext()
+
+  const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
   if (!node) return null
   const isSelected = selectedId === id
   const isDropTarget = hoverTargetId === id
   const isRoot = node.parentId === null
+
+  function onSectionDragStart(e: React.DragEvent, i: number) {
+    e.stopPropagation()
+    setDragIdx(i)
+  }
+  function onSectionDragOver(e: React.DragEvent, i: number) {
+    e.preventDefault()
+    e.stopPropagation()
+    setHoverIdx(i)
+  }
+  function onSectionDrop(e: React.DragEvent, i: number) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (dragIdx === null || dragIdx === i) {
+      setDragIdx(null)
+      setHoverIdx(null)
+      return
+    }
+    const next = [...sections]
+    const [moved] = next.splice(dragIdx, 1)
+    next.splice(i, 0, moved)
+    const existing = pageContents[id]
+    if (existing) setPageContent(id, { ...existing, sections: next })
+    setDragIdx(null)
+    setHoverIdx(null)
+  }
+  function onSectionDragEnd(e: React.DragEvent) {
+    e.stopPropagation()
+    setDragIdx(null)
+    setHoverIdx(null)
+  }
 
   return (
     <div
@@ -63,12 +99,31 @@ function NodeCardImpl({ id }: NodeProps) {
             {node.description}
           </p>
         )}
-        {sectionCount > 0 && (
-          <p className="mt-1 text-[10px] text-muted-foreground/70">
-            {sectionCount} section{sectionCount !== 1 ? "s" : ""}
-          </p>
-        )}
       </div>
+
+      {sections.length > 0 && (
+        <div className="nodrag nopan mt-2 space-y-0.5 border-t pt-1.5">
+          {sections.map((s, i) => (
+            <div
+              key={s.id}
+              draggable
+              onDragStart={(e) => onSectionDragStart(e, i)}
+              onDragOver={(e) => onSectionDragOver(e, i)}
+              onDrop={(e) => onSectionDrop(e, i)}
+              onDragEnd={onSectionDragEnd}
+              className={cn(
+                "nodrag nopan flex cursor-grab items-center gap-1 rounded px-1 py-0.5 select-none",
+                hoverIdx === i && dragIdx !== i
+                  ? "bg-primary/10"
+                  : "hover:bg-muted/50",
+              )}
+            >
+              <GripVertical className="h-3 w-3 shrink-0 text-muted-foreground/30" />
+              <span className="truncate text-[10px] text-muted-foreground">{s.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <button
         type="button"

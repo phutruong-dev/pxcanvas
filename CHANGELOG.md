@@ -9,6 +9,13 @@
 
 ---
 
+## [1.2.0] — Sections visible + drag-droppable on Canvas nodes · 2026-05-21
+
+### Changed
+- `src/components/step-2/node-card.tsx` — sections now render inline on each canvas node card as a compact list with grip handles; drag-drop to reorder sections directly on the canvas (uses `nodrag nopan` + `stopPropagation` to avoid conflict with React Flow node drag); reorder saves to store immediately with no Save button needed; replaces previous "N sections" count-only display
+
+---
+
 ## [1.1.0] — Sections editing + Canvas indicators + Bug fixes · 2026-05-21
 
 ### Added
