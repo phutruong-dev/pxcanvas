@@ -47,7 +47,7 @@ export default function SidePanel({ selectedId, onClose }: Props) {
 
   if (!node) {
     return (
-      <aside className="w-80 shrink-0 border-l bg-background p-6 text-sm text-muted-foreground">
+      <aside className="w-[37.5rem] shrink-0 border-l bg-background p-6 text-sm text-muted-foreground">
         Click a page on the canvas to edit it.
       </aside>
     )
@@ -152,7 +152,7 @@ function NodeEditor({
   }
 
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-l bg-background">
+    <aside className="flex w-[37.5rem] shrink-0 flex-col border-l bg-background">
       <div className="flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold">Page details</h2>
