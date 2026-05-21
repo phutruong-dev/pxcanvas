@@ -9,6 +9,14 @@
 
 ---
 
+## [1.3.0] — Dynamic canvas layout — no more node overlap · 2026-05-21
+
+### Changed
+- `src/lib/utils/sitemap-layout.ts` — `treeToFlow` now accepts `sectionCounts: Record<string, number>` (default `{}`); added `nodeHeight(sectionCount)` export; Y positions are computed per-depth using cumulative max heights instead of a fixed `NODE_HEIGHT` constant — rows automatically space out to fit the tallest card at each depth level
+- `src/components/step-2/sitemap-canvas.tsx` — subscribes to `pageContents` and derives `sectionCounts` via `useMemo`; passes counts to `treeToFlow` so layout re-computes when sections are generated; `onNodeDrag` hit-detection uses `nodeHeight()` per node instead of the old fixed constant
+
+---
+
 ## [1.2.0] — Sections visible + drag-droppable on Canvas nodes · 2026-05-21
 
 ### Changed
