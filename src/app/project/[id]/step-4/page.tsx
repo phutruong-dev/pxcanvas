@@ -379,7 +379,20 @@ export default function Step4Page() {
           {selectedPage && selectedContent !== undefined ? (
             <>
               <div className="shrink-0 border-b bg-muted/20 px-4 py-3">
-                <h2 className="mb-2 text-sm font-semibold">{selectedPage.name} — Sections</h2>
+                <div className="mb-2 flex items-center justify-between">
+                  <h2 className="text-sm font-semibold">{selectedPage.name}</h2>
+                  <Button
+                    size="sm"
+                    variant={selectedContent?.status === "done" ? "outline" : "default"}
+                    disabled={
+                      selectedContent?.status === "generating" || batchRunning || !brandVoice
+                    }
+                    onClick={() => void generateOnePage(selectedPage)}
+                  >
+                    <Zap className="mr-1.5 h-3.5 w-3.5" />
+                    {selectedContent?.status === "done" ? "Regenerate" : "Generate this page"}
+                  </Button>
+                </div>
                 <SectionEditor
                   key={selectedPage.id}
                   sections={selectedContent?.sections ?? []}

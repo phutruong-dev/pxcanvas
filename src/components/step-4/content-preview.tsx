@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, Copy, RefreshCw } from "lucide-react"
+import { Check, Copy, RefreshCw, Zap } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -53,8 +53,12 @@ export default function ContentPreview({
 
   if (!content.markdown && content.status !== "generating") {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-        No content yet — generate to see preview.
+      <div className="flex h-full flex-col items-center justify-center gap-3 text-sm">
+        <p className="text-muted-foreground">No content yet.</p>
+        <Button size="sm" onClick={onRegen} disabled={regenDisabled}>
+          <Zap className="mr-1.5 h-3.5 w-3.5" />
+          Generate this page
+        </Button>
       </div>
     )
   }
