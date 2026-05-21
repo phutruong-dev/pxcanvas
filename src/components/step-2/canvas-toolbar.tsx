@@ -1,6 +1,6 @@
 "use client"
 
-import { AlertTriangle, Download, Redo2, Undo2, ZoomIn, ZoomOut, Maximize2 } from "lucide-react"
+import { AlertTriangle, Download, LayoutGrid, Redo2, Undo2, ZoomIn, ZoomOut, Maximize2 } from "lucide-react"
 import { useReactFlow } from "reactflow"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -11,9 +11,10 @@ import { countNodes } from "@/lib/utils/sitemap-layout"
 type Props = {
   onRegenerate: () => void
   onExport: () => void
+  onAutoLayout: () => void
 }
 
-export default function CanvasToolbar({ onRegenerate, onExport }: Props) {
+export default function CanvasToolbar({ onRegenerate, onExport, onAutoLayout }: Props) {
   const sitemap = useWorkflowStore((s) => s.sitemap)
   const savingStatus = useWorkflowStore((s) => s.savingStatus)
   const { canUndo, canRedo, undo, redo } = useSitemapMutations()
@@ -55,6 +56,16 @@ export default function CanvasToolbar({ onRegenerate, onExport }: Props) {
         </Button>
         <Button variant="ghost" size="icon" aria-label="Fit view" onClick={() => fitView({ padding: 0.2 })}>
           <Maximize2 className="h-4 w-4" />
+        </Button>
+        <div className="mx-2 h-5 w-px bg-border" />
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="Auto-layout"
+          onClick={() => { onAutoLayout(); fitView({ padding: 0.2 }) }}
+        >
+          <LayoutGrid className="mr-1.5 h-4 w-4" />
+          Auto-layout
         </Button>
       </div>
 

@@ -37,6 +37,7 @@ export default function Step2Page() {
   const [generateState, setGenerateState] = useState<"idle" | "loading" | "error">("idle")
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [exportOpen, setExportOpen] = useState(false)
+  const [layoutKey, setLayoutKey] = useState(0)
   const canvasRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -123,7 +124,7 @@ export default function Step2Page() {
           </div>
         </div>
 
-        <CanvasToolbar onRegenerate={generate} onExport={() => setExportOpen(true)} />
+        <CanvasToolbar onRegenerate={generate} onExport={() => setExportOpen(true)} onAutoLayout={() => setLayoutKey((k) => k + 1)} />
 
         <div className="relative flex flex-1 overflow-hidden">
           <div className="relative flex-1">
@@ -131,6 +132,7 @@ export default function Step2Page() {
               selectedId={selectedId}
               onSelect={setSelectedId}
               canvasRef={canvasRef}
+              layoutKey={layoutKey}
             />
 
             {noInput && (

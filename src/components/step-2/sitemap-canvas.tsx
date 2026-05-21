@@ -28,9 +28,10 @@ type Props = {
   selectedId: string | null
   onSelect: (id: string | null) => void
   canvasRef?: RefObject<HTMLDivElement | null>
+  layoutKey?: number
 }
 
-export default function SitemapCanvas({ selectedId, onSelect, canvasRef }: Props) {
+export default function SitemapCanvas({ selectedId, onSelect, canvasRef, layoutKey }: Props) {
   const sitemap = useWorkflowStore((s) => s.sitemap)
   const pageContents = useWorkflowStore((s) => s.pageContents)
   const mutations = useSitemapMutations()
@@ -55,11 +56,11 @@ export default function SitemapCanvas({ selectedId, onSelect, canvasRef }: Props
   const [nodes, setNodes, onNodesChange] = useNodesState(layout.nodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(layout.edges)
 
-  // Re-sync layout whenever the tree or section counts change
+  // Re-sync layout whenever the tree, section counts, or auto-layout is triggered
   useEffect(() => {
     setNodes(layout.nodes)
     setEdges(layout.edges)
-  }, [layout, setNodes, setEdges])
+  }, [layout, layoutKey, setNodes, setEdges])
 
   const onNodeClick: NodeMouseHandler = useCallback(
     (_, n) => onSelect(n.id),
